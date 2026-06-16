@@ -6,6 +6,14 @@ import {
   Settings, Search, MapPin, User, Hash, HardDrive, ShieldCheck, Download, Zap, Database
 } from 'lucide-react';
 
+import { 
+  Activity, Droplets, Gauge, Thermometer, AlertTriangle, CheckCircle, 
+  Settings, Search, MapPin, User, Hash, HardDrive, ShieldCheck, Download, Zap, Database
+} from 'lucide-react';
+
+// Ajoute cette ligne :
+import LossSearchPlan from '../components/LossSearchPlan';
+
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -366,47 +374,16 @@ export default function Index() {
             </div>
 
             {/* TABLE DE PRIORISATION */}
-            <div className="bg-[#0F172A]/80 backdrop-blur-md border border-slate-800 rounded-3xl shadow-xl overflow-hidden">
-              <div className="p-5 border-b border-slate-800 bg-[#060B14]/50">
-                <h3 className="text-sm font-bold text-white tracking-wide">PLAN DE RECHERCHE DES PERTES PHYSIQUES</h3>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-800 text-slate-400 bg-slate-900/40 text-xs uppercase tracking-wider">
-                      <th className="p-4 font-bold">Tronçon ID</th>
-                      <th className="p-4 font-bold">Secteur</th>
-                      <th className="p-4 font-bold">Matériau</th>
-                      <th className="p-4 font-bold">Risque ML</th>
-                      <th className="p-4 font-bold text-right">Priorité d'Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="font-medium text-slate-300">
-                    <tr className="border-b border-slate-800/50 bg-rose-500/5 hover:bg-rose-500/10 transition-colors">
-                      <td className="p-4 font-mono text-white flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-rose-500"/> {pipeConfig.idTroncon}</td>
-                      <td className="p-4">{pipeConfig.zoneAEP}</td>
-                      <td className="p-4">{pipeConfig.materiau} <span className="text-slate-500 text-xs ml-1">DN{pipeConfig.diametreNominal}</span></td>
-                      <td className="p-4 font-bold text-rose-400 text-lg">{leakProbabilityScore}%</td>
-                      <td className="p-4 text-right"><span className="bg-rose-500/20 text-rose-400 border border-rose-500/30 px-3 py-1 rounded-lg text-xs font-black tracking-widest shadow-sm">CRITIQUE</span></td>
-                    </tr>
-                    <tr className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                      <td className="p-4 font-mono">TR-Z2-009</td>
-                      <td className="p-4">Secteur Est</td>
-                      <td className="p-4">PEHD <span className="text-slate-500 text-xs ml-1">DN110</span></td>
-                      <td className="p-4 text-amber-400 font-bold text-lg">32%</td>
-                      <td className="p-4 text-right"><span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3 py-1 rounded-lg text-xs font-bold tracking-widest">MOYENNE</span></td>
-                    </tr>
-                    <tr className="hover:bg-slate-800/30 transition-colors">
-                      <td className="p-4 font-mono">TR-Z1-105</td>
-                      <td className="p-4">Quartier Ouest</td>
-                      <td className="p-4">PVC <span className="text-slate-500 text-xs ml-1">DN90</span></td>
-                      <td className="p-4 text-emerald-400 font-bold text-lg">8%</td>
-                      <td className="p-4 text-right"><span className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-3 py-1 rounded-lg text-xs font-bold tracking-widest">FAIBLE</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            {/* TEMPÉRATURE */}
+            <div className="bg-[#0F172A]/80 backdrop-blur-md border border-slate-800 p-6 rounded-3xl shadow-xl">
+              <h3 className="text-rose-400 font-bold mb-6 flex items-center gap-3 text-sm uppercase tracking-wider">
+                <div className="p-1.5 bg-rose-500/10 rounded-md"><Thermometer className="w-4 h-4" /></div> Température (°C)
+              </h3>
+              {/* ... ton graphique de température ... */}
             </div>
+
+            {/* NOUVEAU TABLEAU DE RECHERCHE DES PERTES */}
+            <LossSearchPlan />
 
           </div>
         )}

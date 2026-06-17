@@ -6,13 +6,7 @@ import {
   Settings, Search, MapPin, User, Hash, HardDrive, ShieldCheck, Download, Zap, Database
 } from 'lucide-react';
 
-import { 
-  Activity, Droplets, Gauge, Thermometer, AlertTriangle, CheckCircle, 
-  Settings, Search, MapPin, User, Hash, HardDrive, ShieldCheck, Download, Zap, Database
-} from 'lucide-react';
-
-// Ajoute cette ligne :
-import LossSearchPlan from '../components/LossSearchPlan';
+import LossSearchPlan from "../components/LossSearchPlan";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -371,15 +365,6 @@ export default function Index() {
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
-            </div>
-
-            {/* TABLE DE PRIORISATION */}
-            {/* TEMPÉRATURE */}
-            <div className="bg-[#0F172A]/80 backdrop-blur-md border border-slate-800 p-6 rounded-3xl shadow-xl">
-              <h3 className="text-rose-400 font-bold mb-6 flex items-center gap-3 text-sm uppercase tracking-wider">
-                <div className="p-1.5 bg-rose-500/10 rounded-md"><Thermometer className="w-4 h-4" /></div> Température (°C)
-              </h3>
-              {/* ... ton graphique de température ... */}
             </div>
 
             {/* NOUVEAU TABLEAU DE RECHERCHE DES PERTES */}

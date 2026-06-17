@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Search, Droplets, Clock, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { MapPin, Search, Droplets, Clock, AlertCircle, CheckCircle } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 type SearchStatus = 'Critique' | 'En cours' | 'Planifié' | 'Résolu';
@@ -55,7 +55,7 @@ const getStatusBadge = (status: SearchStatus) => {
     case 'En cours':
       return <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200"><Clock className="w-3.5 h-3.5" /> EN COURS</span>;
     case 'Résolu':
-      return <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200"><CheckCircle2 className="w-3.5 h-3.5" /> RÉSOLU</span>;
+      return <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200"><CheckCircle className="w-3.5 h-3.5" /> RÉSOLU</span>;
     default:
       return <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200"><Search className="w-3.5 h-3.5" /> PLANIFIÉ</span>;
   }

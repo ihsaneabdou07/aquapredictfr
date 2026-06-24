@@ -47,8 +47,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return (
       <div className="bg-slate-900 border border-slate-700 p-3 rounded-lg shadow-xl text-white">
         <p className="text-xs text-slate-400 mb-2">Relevé à {formatTime(label)}</p>
-        <p className="font-bold text-lg flex items-center gap-2" style={{ color: data.stroke }}>
-          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: data.stroke }}></span>
+        <p className="font-bold text-lg flex items-center gap-2" style={{ color: data.stroke }} aria-label={`${data.value.toFixed(2)} ${data.unit}`}>
+          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: data.stroke }} aria-hidden="true"></span>
           {data.value.toFixed(2)} {data.unit}
         </p>
       </div>

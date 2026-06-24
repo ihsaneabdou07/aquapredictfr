@@ -147,6 +147,7 @@ const HistoryChart = ({ data }: HistoryChartProps) => {
                     : "border-border bg-secondary text-muted-foreground opacity-50 hover:opacity-75"
                 }`}
                 style={isActive ? { color: m.color, borderColor: m.color } : {}}
+                aria-label={m.label}
               >
                 {m.icon}
                 {m.label}
@@ -192,7 +193,7 @@ const HistoryChart = ({ data }: HistoryChartProps) => {
         <div className="flex flex-col gap-4">
           {selectedMetrics.map((m) => (
             <div key={m.key}>
-              <div className="mb-1 flex items-center gap-1.5 text-xs font-mono" style={{ color: m.color }}>
+              <div className="mb-1 flex items-center gap-1.5 text-xs font-mono" style={{ color: m.color }} aria-label={`${m.label} (${m.unit})`}>
                 {m.icon}
                 {m.label} ({m.unit})
               </div>

@@ -49,7 +49,83 @@ npm run preview  # Preview production build
 - src/integrations/supabase: Supabase client and generated types
 - supabase/functions/hydraulic-data-receiver: backend endpoint used by the app
 
-## Deployment
+## Real-Time Data Acquisition (Serial Port)
+
+### Overview
+
+The project includes a Node.js script to capture hydraulic measurements directly from IoT devices via serial port (e.g., ESP32 with sensors).
+
+### Quick Start
+
+1. **Copy the environment template:**
+
+   ```sh
+   cp scripts/.env.example scripts/.env
+   ```
+
+2. **Edit `scripts/.env` with your configuration:**
+
+   ```env
+   SERIAL_PORT=COM3                    # Your COM port (COM3, /dev/ttyUSB0, etc.)
+   SERIAL_BAUD=115200                  # Baud rate
+   SERIAL_OUTPUT_FILE=data.txt         # Local JSONL file
+   SERIAL_SEND_TO_SUPABASE=true        # Enable Supabase sync
+   SUPABASE_FUNCTION_URL=https://...   # Your edge function URL
+   SUPABASE_ANON_KEY=your_key          # Supabase anonymous key
+   ```
+
+3. **Start capturing data:**
+
+   ```sh
+   npm run data:serial
+   ```
+
+### Features
+
+- **Local logging**: Saves all measurements to JSONL file (one per line)
+- **Supabase sync**: Automatically sends data to your backend function
+- **Flexible input**: Accepts `flow_rate`/`flow`/`debit`, `pressure`/`pression`, `temperature`/`temp`
+- **Error resilient**: Ignores malformed lines, continues on network errors
+- **Configurable**: All ports, baud rates, and endpoints via environment variables
+
+### Alternative Data Paths
+
+If COM3 is already used by Arduino IDE or the Serial Monitor, you can avoid serial capture entirely:
+
+- **Wi-Fi**: have the ESP32 send the same JSON payload directly to the Supabase Edge Function over HTTP.
+- **Bluetooth**: use BLE only if you want a local bridge or browser-based reader; it is less convenient for continuous logging than Wi-Fi.
+
+Recommended Wi-Fi flow:
+
+1. ESP32 formats each measurement as JSON.
+2. ESP32 sends a `POST` request to the existing Supabase Edge Function.
+3. The function stores the measurement in the database and can trigger alerts.
+
+Example payload:
+
+```json
+{"flow_rate": 42.5, "pressure": 3.2, "temperature": 22.1, "idTroncon": "TR-Z1-042"}
+```
+
+If you want, I can also add an ESP32 Wi-Fi example that posts directly to the Supabase endpoint.
+
+### Expected Sensor Format
+
+Your IoT device should transmit JSON per line, e.g.:
+
+```json
+{"flow_rate": 42.5, "pressure": 3.2, "temperature": 22.1, "idTroncon": "TR-Z1-042"}
+```
+
+Or:
+
+```json
+{"flow": 42.5, "pression": 3.2, "temp": 22.1}
+```
+
+The script normalizes field names automatically.
+
+### Deployment
 
 Build the project with:
 

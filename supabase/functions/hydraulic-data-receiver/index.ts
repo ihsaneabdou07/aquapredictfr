@@ -20,10 +20,11 @@ serve(async (req) => {
     const payload = await req.json()
     const { flow_rate, pressure, temperature, idTroncon } = payload
 
-    if (typeof flow_rate !== 'number' || typeof pressure !== 'number') {
+    if (typeof flow_rate !== 'number') {
       throw new Error("Format de données invalide venant des capteurs.");
     }
 
+<<<<<<< HEAD
     // 1. APPEL À VOTRE API ML EXTERNE (qui charge les fichiers .pkl)
     // Remplacez l'URL par l'adresse de votre API déployée
     const mlResponse = await fetch('https://votre-api-ml.com/predict', {
@@ -35,6 +36,10 @@ serve(async (req) => {
         temperature: temperature || 18.5 
       })
     });
+=======
+    // 1. Logique de détection de fuite
+    const is_leak_alert = typeof pressure === 'number' ? pressure < 2.5 && flow_rate > 5.0 : false; 
+>>>>>>> cccb0a78908d3c47bba31835a25d9a3fd79cdf3a
 
     const mlData = await mlResponse.json();
     const leak_probability = mlData.probability; // Score entre 0 et 1
@@ -48,7 +53,7 @@ serve(async (req) => {
       .insert([
         { 
           flow_rate: flow_rate, 
-          pressure: pressure, 
+          pressure: typeof pressure === 'number' ? pressure : null, 
           temperature: temperature || 18.5, 
           is_leak_alert: is_leak_alert,
           leak_probability: leak_probability // Enregistrement du score du modèle

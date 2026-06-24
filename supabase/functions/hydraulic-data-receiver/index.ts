@@ -24,10 +24,25 @@ serve(async (req) => {
       throw new Error("Format de données invalide venant des capteurs.");
     }
 
-    // 1. Logique de détection de fuite
-    const is_leak_alert = pressure < 2.5 && flow_rate > 5.0; 
+    // 1. APPEL À VOTRE API ML EXTERNE (qui charge les fichiers .pkl)
+    // Remplacez l'URL par l'adresse de votre API déployée
+    const mlResponse = await fetch('https://votre-api-ml.com/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        pressure: pressure, 
+        flow_rate: flow_rate, 
+        temperature: temperature || 18.5 
+      })
+    });
 
-    // 2. Insertion des données dans la base
+    const mlData = await mlResponse.json();
+    const leak_probability = mlData.probability; // Score entre 0 et 1
+
+    // 2. LOGIQUE DÉCISIONNELLE (Alerte si > 70% de probabilité)
+    const is_leak_alert = leak_probability > 0.7;
+
+    // 3. Insertion des données dans la base avec la probabilité
     const { error } = await supabaseClient
       .from('hydraulic_measurements')
       .insert([
@@ -35,66 +50,45 @@ serve(async (req) => {
           flow_rate: flow_rate, 
           pressure: pressure, 
           temperature: temperature || 18.5, 
-          is_leak_alert: is_leak_alert 
+          is_leak_alert: is_leak_alert,
+          leak_probability: leak_probability // Enregistrement du score du modèle
         }
       ])
 
     if (error) throw error
 
     // ==========================================
-    // 3. ENVOI DE L'EMAIL D'ALERTE AU CLIENT
+    // 4. ENVOI DE L'EMAIL D'ALERTE (SI ALERTE)
     // ==========================================
     if (is_leak_alert) {
       const resendApiKey = Deno.env.get('RESEND_API_KEY');
       const clientEmail = Deno.env.get('CLIENT_EMAIL');
 
       if (resendApiKey && clientEmail) {
-        const emailResponse = await fetch('https://api.resend.com/emails', {
+        await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${resendApiKey}`
           },
           body: JSON.stringify({
-            from: 'AquaPredict Alertes <onboarding@resend.dev>', // Email autorisé par défaut par Resend
+            from: 'AquaPredict Alertes <onboarding@resend.dev>',
             to: clientEmail,
-            subject: '🚨 ALERTE CRITIQUE : Anomalie détectée sur le réseau d\'eau',
+            subject: '🚨 ALERTE : Risque de fuite détecté par IA',
             html: `
-              <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
-                <div style="background-color: #ef4444; color: white; padding: 20px; text-align: center;">
-                  <h2 style="margin: 0;">⚠️ Alerte de Fuite Physique</h2>
-                </div>
-                <div style="padding: 20px; background-color: #f8fafc; color: #333;">
-                  <p>Bonjour,</p>
-                  <p>Le système <strong>AquaPredict Analytics</strong> vient de détecter une chute de pression anormale indiquant une possible rupture ou fuite majeure sur votre réseau.</p>
-                  
-                  <h3 style="border-bottom: 2px solid #cbd5e1; padding-bottom: 5px;">Détails de l'anomalie :</h3>
-                  <ul>
-                    <li><strong>Tronçon suspecté :</strong> ${idTroncon || 'TR-Z1-042 (Défaut)'}</li>
-                    <li><strong>Pression actuelle :</strong> <span style="color: #ef4444; font-weight: bold;">${pressure} bar</span> <em>(Seuil d'alerte: < 2.5 bar)</em></li>
-                    <li><strong>Débit mesuré :</strong> ${flow_rate} L/min</li>
-                    <li><strong>Heure de détection :</strong> ${new Date().toLocaleString('fr-FR')}</li>
-                  </ul>
-                  
-                  <p style="margin-top: 30px;">Veuillez dépêcher une équipe technique pour une inspection acoustique du tronçon prioritaire.</p>
-                  <br/>
-                  <p><em>Plateforme AquaPredict SCADA</em></p>
-                </div>
-              </div>
+              <h2>Alerte de Fuite (Probabilité : ${(leak_probability * 100).toFixed(0)}%)</h2>
+              <p>Tronçon: ${idTroncon || 'TR-Z1-042'}</p>
+              <p>Le système a détecté un risque élevé basé sur les paramètres hydrauliques.</p>
             `
           })
         });
-
-        if (!emailResponse.ok) {
-          console.error("Erreur lors de l'envoi de l'email :", await emailResponse.text());
-        }
       }
     }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "Données enregistrées.",
+        leak_probability: leak_probability,
         alert_triggered: is_leak_alert 
       }), 
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }

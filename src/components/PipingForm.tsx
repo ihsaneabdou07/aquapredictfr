@@ -124,7 +124,7 @@ const PipingForm = () => {
           {/* ... (ONGLET SCAN INCHANGÉ) ... */}
           <TabsContent value="scan" className="space-y-4">
             <div className="border-2 border-dashed border-slate-200 rounded-xl p-16 text-center hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-              <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
+              <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} aria-label="Upload image" />
               {isScanning ? (
                 <div className="flex flex-col items-center space-y-4">
                   <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />

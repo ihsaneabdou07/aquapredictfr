@@ -43,7 +43,7 @@ npm run data:serial
 
 ### Sortie attendue
 
-```
+```powershell
 [serial] Port ouvert: COM3 @ 115200
 [serial] Sauvegarde dans: data.txt
 [serial] Envoi Supabase: active
@@ -60,6 +60,7 @@ Ton capteur (ESP32) doit envoyer une ligne JSON par mesure :
 ```
 
 **Noms de champs acceptés :**
+
 - Débit: `flow_rate`, `flow`, `debit`
 - Pression: `pressure`, `pression`
 - Température: `temperature`, `temp`
@@ -80,7 +81,7 @@ wc -l data.txt
 ## 🚀 Troubleshooting
 
 | Problème | Solution |
-|----------|----------|
+| --- | --- |
 | Port non trouvé | Vérifier SERIAL_PORT et brancher le device |
 | Erreur Supabase 401 | Vérifier SUPABASE_ANON_KEY |
 | Ligne d'erreur "Donnee ignoree" | Vérifier format JSON du capteur |

@@ -5,7 +5,9 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
 // Correction indispensable pour afficher les icônes de marqueurs sur React
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const defaultIcon = L.Icon.Default.prototype as any;
+delete defaultIcon._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
@@ -43,8 +45,7 @@ export function NetworkMap() {
   ];
 
   return (
-    // Le style en ligne est CRUCIAL ici
-    <div style={{ height: '500px', width: '100%' }} className="relative z-0 rounded-xl overflow-hidden border border-slate-700">
+    <div className="h-[500px] w-full relative z-0 rounded-xl overflow-hidden border border-slate-700">
       <MapContainer 
         center={center} 
         zoom={14} 

@@ -58,11 +58,13 @@ The project includes a Node.js script to capture hydraulic measurements directly
 ### Quick Start
 
 1. **Copy the environment template:**
+
    ```sh
    cp scripts/.env.example scripts/.env
    ```
 
 2. **Edit `scripts/.env` with your configuration:**
+
    ```env
    SERIAL_PORT=COM3                    # Your COM port (COM3, /dev/ttyUSB0, etc.)
    SERIAL_BAUD=115200                  # Baud rate
@@ -73,6 +75,7 @@ The project includes a Node.js script to capture hydraulic measurements directly
    ```
 
 3. **Start capturing data:**
+
    ```sh
    npm run data:serial
    ```
@@ -88,11 +91,13 @@ The project includes a Node.js script to capture hydraulic measurements directly
 ### Expected Sensor Format
 
 Your IoT device should transmit JSON per line, e.g.:
+
 ```json
 {"flow_rate": 42.5, "pressure": 3.2, "temperature": 22.1, "idTroncon": "TR-Z1-042"}
 ```
 
 Or:
+
 ```json
 {"flow": 42.5, "pression": 3.2, "temp": 22.1}
 ```

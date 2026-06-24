@@ -29,7 +29,7 @@ serve(async (req) => {
 
     // 2. Insertion des données dans la base
     const { error } = await supabaseClient
-      .from('sensor_readings')
+      .from('hydraulic_measurements')
       .insert([
         { 
           flow_rate: flow_rate, 

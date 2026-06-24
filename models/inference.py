@@ -1,15 +1,18 @@
 import joblib
-import numpy as np
+import os
 
-# Chargement du modèle et du scaler
-model = joblib.load('models/leak_detection_model.pkl')
-scaler = joblib.load('models/scaler.pkl')
+# Chargement sécurisé
+model_path = os.path.join(os.path.dirname(__file__), 'leak_detection_model.pkl')
+scaler_path = os.path.join(os.path.dirname(__file__), 'scaler.pkl')
+
+model = joblib.load(model_path)
+scaler = joblib.load(scaler_path)
 
 def get_leak_probability(pressure, flow, temp):
-    # Transformation des données brutes
+    import numpy as np
+    # Transformation des données
     data = np.array([[pressure, flow, temp]])
     data_scaled = scaler.transform(data)
-    
-    # Calcul de la probabilité
+    # Prédiction
     prob = model.predict_proba(data_scaled)[:, 1][0]
     return float(prob)

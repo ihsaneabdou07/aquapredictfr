@@ -88,6 +88,27 @@ The project includes a Node.js script to capture hydraulic measurements directly
 - **Error resilient**: Ignores malformed lines, continues on network errors
 - **Configurable**: All ports, baud rates, and endpoints via environment variables
 
+### Alternative Data Paths
+
+If COM3 is already used by Arduino IDE or the Serial Monitor, you can avoid serial capture entirely:
+
+- **Wi-Fi**: have the ESP32 send the same JSON payload directly to the Supabase Edge Function over HTTP.
+- **Bluetooth**: use BLE only if you want a local bridge or browser-based reader; it is less convenient for continuous logging than Wi-Fi.
+
+Recommended Wi-Fi flow:
+
+1. ESP32 formats each measurement as JSON.
+2. ESP32 sends a `POST` request to the existing Supabase Edge Function.
+3. The function stores the measurement in the database and can trigger alerts.
+
+Example payload:
+
+```json
+{"flow_rate": 42.5, "pressure": 3.2, "temperature": 22.1, "idTroncon": "TR-Z1-042"}
+```
+
+If you want, I can also add an ESP32 Wi-Fi example that posts directly to the Supabase endpoint.
+
 ### Expected Sensor Format
 
 Your IoT device should transmit JSON per line, e.g.:

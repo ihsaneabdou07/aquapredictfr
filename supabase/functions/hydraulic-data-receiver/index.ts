@@ -20,12 +20,12 @@ serve(async (req) => {
     const payload = await req.json()
     const { flow_rate, pressure, temperature, idTroncon } = payload
 
-    if (typeof flow_rate !== 'number' || typeof pressure !== 'number') {
+    if (typeof flow_rate !== 'number') {
       throw new Error("Format de données invalide venant des capteurs.");
     }
 
     // 1. Logique de détection de fuite
-    const is_leak_alert = pressure < 2.5 && flow_rate > 5.0; 
+    const is_leak_alert = typeof pressure === 'number' ? pressure < 2.5 && flow_rate > 5.0 : false; 
 
     // 2. Insertion des données dans la base
     const { error } = await supabaseClient
@@ -33,7 +33,7 @@ serve(async (req) => {
       .insert([
         { 
           flow_rate: flow_rate, 
-          pressure: pressure, 
+          pressure: typeof pressure === 'number' ? pressure : null, 
           temperature: temperature || 18.5, 
           is_leak_alert: is_leak_alert 
         }

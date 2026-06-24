@@ -16,6 +16,26 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 );
 
+import { NetworkMap } from "@/components/NetworkMap";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export default function Dashboard() {
+  return (
+    <div className="p-6 space-y-6">
+      {/* Reste de ton dashboard... */}
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Cartographie du Réseau</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <NetworkMap />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 interface SensorData {
   id: string;
   created_at: string;

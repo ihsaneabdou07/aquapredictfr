@@ -39,16 +39,38 @@ parser.on("data", (data) => {
   try {
     const json = JSON.parse(data);
 
-    console.log("Débit:", json.data?.flow_rate ?? json.flow_rate);
+    // ✅ récupérer proprement les valeurs
+    const flow =
+      json?.data?.flow_rate ??
+      json.flow_rate ??
+      json.flow ??
+      0;
 
-    // 🔥 envoi temps réel vers frontend
+    const pressure =
+      json?.data?.pressure ??
+      json.pressure ??
+      0;
+
+    // ✅ afficher dans terminal
+    console.log("💧 Débit:", flow, "L/min");
+    console.log("📊 Pression:", pressure, "bar");
+
+    // ✅ construire payload propre pour frontend
+    const payload = {
+      flow_rate: flow,
+      pressure: pressure,
+      temperature: 18.5 // temporaire
+    };
+
+    // ✅ envoyer à tous les clients WebSocket
     wss.clients.forEach((client) => {
       if (client.readyState === 1) {
-        client.send(JSON.stringify(json));
+        client.send(JSON.stringify(payload));
       }
     });
 
-  } catch {
+  } catch (err) {
     // ignore bruit série
+    console.log("⚠️ Donnée ignorée:", data);
   }
 });

@@ -1,93 +1,61 @@
 import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
-// L'import du CSS est obligatoire pour que la carte ne soit pas transparente
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-
-// Correction indispensable pour afficher les icônes de marqueurs sur React
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const defaultIcon = L.Icon.Default.prototype as any;
-delete defaultIcon._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+import networkImage from '../../image.png';
 
 interface Sensor {
   id: string;
   name: string;
-  coordinates: [number, number];
+  position: { top: string; left: string };
   type: string;
-  flowRate?: number;
   status: 'Normal' | 'Alerte Fuite' | 'Hors ligne';
 }
 
-interface Pipe {
-  id: string;
-  path: [number, number][];
-  diameter: number;
+// Props pour rendre la carte réactive
+interface NetworkMapProps {
+  leakDetected?: boolean;
 }
 
-export function NetworkMap() {
-  // Coordonnées centrées sur la région de Casablanca/Bouskoura
-  const center: [number, number] = [33.45, -7.62];
-
+export function NetworkMap({ leakDetected = false }: NetworkMapProps) {
   const sensors: Sensor[] = [
-    { id: 'S1', name: 'ESP32 - Noeud Principal', coordinates: [33.45, -7.62], type: 'Débitmètre FS300A', flowRate: 45.2, status: 'Normal' },
-    { id: 'S2', name: 'ESP32 - Secteur B', coordinates: [33.455, -7.615], type: 'Débitmètre FS300A', flowRate: 38.1, status: 'Alerte Fuite' },
-    { id: 'S3', name: 'Vanne de contrôle', coordinates: [33.448, -7.61], type: 'Pression', status: 'Normal' },
-  ];
-
-  const pipes: Pipe[] = [
-    { id: 'P1', path: [[33.45, -7.62], [33.455, -7.615]], diameter: 100 },
-    { id: 'P2', path: [[33.45, -7.62], [33.448, -7.61]], diameter: 75 },
+    { id: 'G1', name: 'Capteur G', position: { top: '28%', left: '35%' }, type: 'Débit / pompe', status: 'Normal' },
+    { id: 'P1', name: 'Capteur P', position: { top: '20%', left: '52%' }, type: 'Pression', status: leakDetected ? 'Alerte Fuite' : 'Normal' },
+    { id: 'T1', name: 'Capteur T', position: { top: '62%', left: '65%' }, type: 'Température', status: 'Normal' },
   ];
 
   return (
-    <div className="h-[500px] w-full relative z-0 rounded-xl overflow-hidden border border-slate-700">
-      <MapContainer 
-        center={center} 
-        zoom={14} 
-        style={{ height: '100%', width: '100%' }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+    <div className="relative h-[500px] w-full rounded-xl overflow-hidden border border-slate-700 bg-slate-950 shadow-inner">
+      <img
+        src={networkImage}
+        alt="Réseau hydraulique"
+        className="absolute inset-0 h-full w-full object-contain object-center opacity-95"
+      />
+      <div className="absolute inset-0 bg-slate-950/20" />
 
-        {pipes.map((pipe) => (
-          <Polyline 
-            key={pipe.id} 
-            positions={pipe.path} 
-            color="#22d3ee" // Cyan pour bien ressortir sur le thème sombre
-            weight={pipe.diameter > 80 ? 6 : 4} 
-            opacity={0.8}
-          >
-            <Popup>Tuyau {pipe.id} (Diamètre: {pipe.diameter}mm)</Popup>
-          </Polyline>
-        ))}
-
+      <div className="absolute inset-0">
         {sensors.map((sensor) => (
-          <Marker key={sensor.id} position={sensor.coordinates}>
-            <Popup>
-              <div className="p-1 font-sans text-slate-900">
-                <h3 className="font-bold text-sm mb-1">{sensor.name}</h3>
-                <p className="text-xs text-slate-600">Type: {sensor.type}</p>
-                {sensor.flowRate && (
-                  <p className="text-xs mt-1">Débit: <span className="font-semibold">{sensor.flowRate} L/min</span></p>
-                )}
-                <div className="mt-2 flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${sensor.status === 'Alerte Fuite' ? 'bg-red-500' : 'bg-emerald-500'}`}></span>
-                  <span className={`text-xs font-semibold ${sensor.status === 'Alerte Fuite' ? 'text-red-600' : 'text-emerald-600'}`}>
-                    {sensor.status}
-                  </span>
-                </div>
-              </div>
-            </Popup>
-          </Marker>
+          <div
+            key={sensor.id}
+            className={`absolute h-3 w-3 rounded-full border-2 ${sensor.status === 'Alerte Fuite' ? 'border-rose-400 bg-rose-500/80' : 'border-emerald-400 bg-emerald-500/80'}`}
+            style={{ top: sensor.position.top, left: sensor.position.left, transform: 'translate(-50%, -50%)' }}
+            aria-hidden="true"
+          />
         ))}
-      </MapContainer>
+      </div>
+
+      <div className="absolute bottom-4 right-4 rounded-3xl border border-slate-700 bg-slate-950/90 p-4 text-sm text-slate-100 backdrop-blur-xl shadow-lg">
+        <div className="font-semibold mb-2">Statut réseau</div>
+        <div className={leakDetected ? 'text-rose-400' : 'text-emerald-400'}>
+          {leakDetected ? 'Fuite détectée' : 'Réseau stable'}
+        </div>
+      </div>
+
+      <div className="absolute bottom-4 left-4 rounded-3xl border border-slate-700 bg-slate-950/90 p-4 text-xs text-slate-100 backdrop-blur-xl shadow-lg max-w-xs">
+        <div className="font-semibold mb-2">Capteurs</div>
+        <div className="space-y-1">
+          <div><span className="font-semibold text-emerald-300">G1</span> : capteur de débit / pompe, haut gauche</div>
+          <div><span className="font-semibold text-emerald-300">P1</span> : capteur de pression, haut centre</div>
+          <div><span className="font-semibold text-emerald-300">T1</span> : capteur de température, bas droite</div>
+        </div>
+      </div>
     </div>
   );
 }

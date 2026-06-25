@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 export interface DataPoint {
   time: string;
@@ -123,142 +122,63 @@ export const useHydraulicData = () => {
   const [current, setCurrent] = useState<DataPoint>({
     time: "",
     timestamp: Date.now(),
-    debit: 125,
+    debit: 0,
     pression: 3.2,
-    temperature: 42,
+    temperature: 18.5,
   });
 
   const [alerts, setAlerts] = useState<HydraulicAlert[]>([]);
-  const [isPaused, setIsPaused] = useState(false);
-  const [isSimulationMode, setIsSimulationMode] = useState(true); // Par défaut en mode simulation
-  const initialized = useRef(false);
-
-  const generatePoint = useCallback((t: number): DataPoint => {
-    const now = new Date();
-    return {
-      time: now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
-      timestamp: now.getTime(),
-      debit: Math.round(generateValue(120, 40, t, 0.3) * 10) / 10,
-      pression: Math.round(generateValue(3.5, 1.5, t, 0.2) * 100) / 100,
-      temperature: Math.round(generateValue(45, 15, t, 0.15) * 10) / 10,
-    };
-  }, []);
-
-  const normalizeAlertsFromApi = useCallback((raw: HydraulicAlertRaw[] | unknown): HydraulicAlert[] => {
-    if (!Array.isArray(raw)) return [];
-
-    return raw
-      .map((a) => ({
-        id: String(a.id ?? `${a.metric_name}:${a.alert_type}`),
-        metric_name: String(a.metric_name ?? ""),
-        alert_type: String(a.alert_type ?? ""),
-        current_value: coerceNumber(a.current_value),
-        threshold_value: coerceNumber(a.threshold_value),
-        severity: String(a.severity ?? "warning"),
-        timestamp: String(a.timestamp ?? new Date().toISOString()),
-      }))
-      .filter((a) => a.metric_name && a.alert_type);
-  }, []);
-
-  // Fonction pour récupérer les données réelles depuis l'API
-  const fetchRealData = useCallback(async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke("hydraulic-data-receiver", {
-        method: "GET",
-      });
-
-      if (error) {
-        console.error("Erreur lors de la récupération des données:", error);
-        return null;
-      }
-
-      return data as HydraulicApiResponse;
-    } catch (error) {
-      console.error("Erreur réseau:", error);
-      return null;
-    }
-  }, []);
 
   useEffect(() => {
-    if (!initialized.current) {
-      // Initialize with 30 points
-      const now = Date.now();
-      const initial: DataPoint[] = [];
-      for (let i = 29; i >= 0; i--) {
-        const t = (now - i * 2000) / 1000;
-        const d = new Date(now - i * 2000);
-        initial.push({
-          ...generatePoint(t),
-          time: d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
-          timestamp: d.getTime(),
-        });
-      }
-      setHistory(initial);
-      setCurrent(initial[initial.length - 1]);
-      setAlerts(buildLocalAlerts(initial[initial.length - 1]));
-      initialized.current = true;
-    }
+    const socket = new WebSocket("ws://10.100.10.30:3001");
 
-    if (isPaused) return;
+    socket.onopen = () => {
+      console.log("✅ WebSocket connecté");
+    };
 
-    const interval = setInterval(async () => {
-      if (isSimulationMode) {
-        // Mode simulation (données générées)
-        const t = Date.now() / 1000;
-        const point = generatePoint(t);
-        setCurrent(point);
-        setHistory((prev) => [...prev.slice(-29), point]);
-        setAlerts(buildLocalAlerts(point));
-      } else {
-        // Mode réel (données depuis l'API)
-        const realData = await fetchRealData();
-        if (realData?.data && realData.data.length > 0) {
-          const latestPoint = realData.data[0];
+    socket.onmessage = (event) => {
+      console.log("📡 DATA:", event.data);
+      try {
+        const data = JSON.parse(event.data);
+
+        const flow =
+          data?.data?.flow_rate ??
+          data.flow_rate ??
+          data.flow ??
+          0;
+
+        setCurrent((prev) => {
+          const now = new Date();
+
           const point: DataPoint = {
-            time: new Date(latestPoint.timestamp).toLocaleTimeString("fr-FR", {
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-            }),
-            timestamp: new Date(latestPoint.timestamp).getTime(),
-            debit: coerceNumber(latestPoint.debit),
-            pression: coerceNumber(latestPoint.pression),
-            temperature: coerceNumber(latestPoint.temperature),
+            time: now.toLocaleTimeString("fr-FR"),
+            timestamp: now.getTime(),
+            debit: flow,
+            pression: prev.pression,
+            temperature: prev.temperature,
           };
-          setCurrent(point);
-          setHistory((prev) => [...prev.slice(-29), point]);
-        }
 
-        // Alertes actives calculées côté backend (fallback côté client si non présent)
-        const normalized = normalizeAlertsFromApi(realData?.alerts);
-        if (normalized.length > 0) {
-          setAlerts(normalized);
-        } else if (realData?.data?.[0]) {
-          const lp = realData.data[0];
-          const fallbackPoint: DataPoint = {
-            time: "",
-            timestamp: new Date(lp.timestamp).getTime(),
-            debit: coerceNumber(lp.debit),
-            pression: coerceNumber(lp.pression),
-            temperature: coerceNumber(lp.temperature),
-          };
-          setAlerts(buildLocalAlerts(fallbackPoint));
-        } else {
-          setAlerts([]);
-        }
+          setHistory((h) => [...h.slice(-29), point]);
+          setAlerts(buildLocalAlerts(point));
+
+          return point;
+        });
+
+      } catch (err) {
+        console.log("Erreur JSON:", err);
       }
-    }, 2000);
+    };
 
-    return () => clearInterval(interval);
-  }, [generatePoint, isPaused, isSimulationMode, fetchRealData, normalizeAlertsFromApi]);
+    socket.onclose = () => {
+      console.log("❌ WebSocket fermé");
+    };
+
+    return () => socket.close();
+  }, []);
 
   return {
     current,
     history,
-    alerts,
-    isPaused,
-    setIsPaused,
-    isSimulationMode,
-    setIsSimulationMode,
+    alerts
   };
 };

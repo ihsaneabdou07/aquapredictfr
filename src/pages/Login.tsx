@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -15,22 +14,22 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+  e.preventDefault();
+  setLoading(true);
 
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Identifiants invalides",
-      });
-    } else {
-      navigate("/");
-    }
-    setLoading(false);
-  };
+  // ✅ login simple (sans supabase)
+  if (email === "admin@test.com" && password === "1234") {
+    navigate("/"); // accès au dashboard
+  } else {
+    toast({
+      variant: "destructive",
+      title: "Erreur",
+      description: "Identifiants invalides",
+    });
+  }
+
+  setLoading(false);
+};
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">

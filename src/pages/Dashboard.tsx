@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import {
   AreaChart,
   Area,
@@ -9,17 +8,12 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
+import { Upload } from "lucide-react";
 
 import { NetworkMap } from "@/components/NetworkMap";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
-
-// Initialisation du client Supabase
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-);
 
 interface SensorData {
   id: string;
@@ -28,6 +22,7 @@ interface SensorData {
   pressure: number;
   temperature: number;
   is_leak_alert: boolean;
+  leak_probability?: number;
 }
 
 const formatTime = (timeStr: string) => {
@@ -58,7 +53,27 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export default function Dashboard() {
   const [data, setData] = useState<SensorData[]>([]);
-  const [alertActive, setAlertActive] = useState<boolean>(false);
+  const [lastPrediction, setLastPrediction] = useState<number>(0);
+
+  // Fonction pour gérer l'upload d'image
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('http://localhost:8000/analyze-network', {
+        method: 'POST',
+        body: formData
+      });
+      const result = await response.json();
+      console.log("Composants détectés par IA:", result);
+      alert("Analyse terminée ! Vérifie la console pour les coordonnées.");
+    } catch (error) {
+      console.error("Erreur lors de l'analyse:", error);
+    }
+  };
 
   // Gestion de l'upload d'image
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,14 +119,12 @@ export default function Dashboard() {
           setData((currentData) => [...currentData.slice(-29), newData]);
           setAlertActive(newData.is_leak_alert);
         }
-      )
-      .subscribe();
 
     return () => { supabase.removeChannel(subscription); };
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6 font-sans text-slate-200">
+    <div className="min-h-screen bg-slate-950 p-6 text-slate-200">
       <div className="max-w-6xl mx-auto space-y-8">
         
         <header className="flex justify-between items-center border-b border-slate-800 pb-4">
@@ -135,7 +148,7 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            <NetworkMap />
+            <NetworkMap leakDetected={lastPrediction > 0.5} />
           </CardContent>
         </Card>
 

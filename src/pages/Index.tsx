@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+// import { createClient } from '@supabase/supabase-js';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { 
   Activity, Droplets, Gauge, Thermometer, AlertTriangle, CheckCircle, 
@@ -8,14 +8,14 @@ import {
 
 import LossSearchPlan from "../components/LossSearchPlan";
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-);
+// const supabase = createClient(
+//   import.meta.env.VITE_SUPABASE_URL,
+//   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+// );
 
 interface SensorData {
   id: string;
-  created_at: string;
+  created_at: number;
   flow_rate: number;
   pressure: number;
   temperature: number;
@@ -50,6 +50,7 @@ export default function Index() {
   const [inputMode, setInputMode] = useState<'manuel' | 'intelligent'>('manuel');
   const [isScanning, setIsScanning] = useState(false);
   const [data, setData] = useState<SensorData[]>([]);
+  console.log("DATA STATE:", data);
   const [alertActive, setAlertActive] = useState<boolean>(false);
 
   const [clientConfig, setClientConfig] = useState({ nomClient: '', responsable: '', localisation: '', referenceProjet: '' });
@@ -89,24 +90,53 @@ export default function Index() {
   if (currentPressure > 0 && currentPressure < 2.5 && currentFlow > Number(pipeConfig.debitConsigne)) leakProbabilityScore = 88;
   else if (flowDeviation > 5) leakProbabilityScore = 45;
 
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      const { data: initialData } = await supabase.from('sensor_readings').select('*').order('created_at', { ascending: false }).limit(30);
-      if (initialData && initialData.length > 0) {
-        setData(initialData.reverse());
-        setAlertActive(initialData[initialData.length - 1]?.is_leak_alert || false);
-      }
-    };
-    fetchInitialData();
-    const subscription = supabase.channel('public:sensor_readings').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sensor_readings' },
-      (payload) => {
-        const newData = payload.new as SensorData;
-        setData(curr => [...curr, newData].slice(-30));
-        setAlertActive(newData.is_leak_alert);
-      }
-    ).subscribe();
-    return () => { supabase.removeChannel(subscription); };
-  }, []);
+useEffect(() => {
+  const socket = new WebSocket("ws://10.100.10.30:3001");
+
+  socket.onopen = () => {
+    console.log("✅ Connected WebSocket");
+  };
+
+  socket.onmessage = (event) => {
+    console.log("📡 RAW:", event.data);
+
+    try {
+      const json = JSON.parse(event.data);
+
+      const flow =
+        json?.data?.flow_rate ??
+        json.flow_rate ??
+        json.flow ??
+        0;
+
+      const now = new Date().getTime(); // timestamp simple
+
+      const newPoint: SensorData = {
+        id: Math.random().toString(),
+        created_at: now,
+        flow_rate: flow,
+        pressure: 3.2,
+        temperature: 18.5,
+        is_leak_alert: false
+      };
+
+      setData((prev) => [...prev, newPoint].slice(-30));
+
+    } catch (e) {
+      console.log("❌ JSON error", e);
+    }
+  };
+
+  socket.onerror = (err) => {
+    console.log("❌ WS ERROR:", err);
+  };
+
+  socket.onclose = () => {
+    console.log("❌ WS closed");
+  };
+
+  return () => socket.close();
+}, []);
 
   return (
     <div className="min-h-screen bg-[#060B14] p-4 md:p-8 font-sans text-slate-200 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#060B14] to-[#060B14]">
@@ -332,7 +362,7 @@ export default function Index() {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                      <XAxis dataKey="created_at" tickFormatter={formatTime} stroke="#475569" fontSize={10} tickMargin={12} />
+                      <XAxis dataKey="created_at" tickFormatter={(t) => new Date(t).toLocaleTimeString()} stroke="#475569" fontSize={10} tickMargin={12} />
                       <YAxis stroke="#475569" fontSize={10} tickMargin={8} />
                       <Tooltip content={<CustomTooltip />} />
                       <Area type="monotone" dataKey="pressure" name="Pression" unit="bar" stroke="#fbbf24" strokeWidth={3} fill="url(#colorPressure)" dot={{ r: 0 }} activeDot={{ r: 6, fill: '#fbbf24', stroke: '#fff', strokeWidth: 2 }} />

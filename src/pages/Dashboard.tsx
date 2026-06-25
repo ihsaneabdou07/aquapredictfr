@@ -10,9 +10,10 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-// Imports de tes composants d'interface
 import { NetworkMap } from "@/components/NetworkMap";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Upload } from "lucide-react";
 
 // Initialisation du client Supabase
 const supabase = createClient(
@@ -29,7 +30,6 @@ interface SensorData {
   is_leak_alert: boolean;
 }
 
-// Fonction utilitaire pour formater l'horodatage
 const formatTime = (timeStr: string) => {
   if (!timeStr) return '';
   const date = new Date(timeStr);
@@ -40,15 +40,14 @@ const formatTime = (timeStr: string) => {
   });
 };
 
-// Info-bulle (Tooltip) personnalisée
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0];
     return (
       <div className="bg-slate-900 border border-slate-700 p-3 rounded-lg shadow-xl text-white">
         <p className="text-xs text-slate-400 mb-2">Relevé à {formatTime(label)}</p>
-        <p className="font-bold text-lg flex items-center gap-2" style={{ color: data.stroke }} aria-label={`${data.value.toFixed(2)} ${data.unit}`}>
-          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: data.stroke }} aria-hidden="true"></span>
+        <p className="font-bold text-lg flex items-center gap-2" style={{ color: data.stroke }}>
+          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: data.stroke }}></span>
           {data.value.toFixed(2)} {data.unit}
         </p>
       </div>
@@ -61,8 +60,27 @@ export default function Dashboard() {
   const [data, setData] = useState<SensorData[]>([]);
   const [alertActive, setAlertActive] = useState<boolean>(false);
 
+  // Gestion de l'upload d'image
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('http://localhost:8000/analyze-network', {
+        method: 'POST',
+        body: formData
+      });
+      const result = await response.json();
+      console.log("Composants détectés par IA:", result);
+      alert("Analyse terminée ! Vérifie la console pour les coordonnées.");
+    } catch (error) {
+      console.error("Erreur lors de l'analyse:", error);
+    }
+  };
+
   useEffect(() => {
-    // 1. Charger l'historique initial
     const fetchInitialData = async () => {
       const { data: initialData } = await supabase
         .from('sensor_readings')
@@ -78,26 +96,18 @@ export default function Dashboard() {
 
     fetchInitialData();
 
-    // 2. Écouter la table en temps réel
     const subscription = supabase
       .channel('public:sensor_readings')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'sensor_readings' },
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sensor_readings' }, 
         (payload) => {
           const newData = payload.new as SensorData;
-          setData((currentData) => {
-            const updatedData = [...currentData, newData];
-            return updatedData.length > 30 ? updatedData.slice(1) : updatedData;
-          });
+          setData((currentData) => [...currentData.slice(-29), newData]);
           setAlertActive(newData.is_leak_alert);
         }
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(subscription);
-    };
+    return () => { supabase.removeChannel(subscription); };
   }, []);
 
   return (
@@ -105,82 +115,56 @@ export default function Dashboard() {
       <div className="max-w-6xl mx-auto space-y-8">
         
         <header className="flex justify-between items-center border-b border-slate-800 pb-4">
-          <h1 className="text-3xl font-bold text-white tracking-wide">
-            MONITORING ET FLUX EN TEMPS RÉEL
-          </h1>
-          
-          {/* Indice d'alerte pour détection de pertes d'eau */}
+          <h1 className="text-3xl font-bold text-white tracking-wide">MONITORING RÉSEAU</h1>
           {alertActive ? (
-            <div className="bg-red-500/20 border border-red-500 text-red-400 px-5 py-2 rounded-full font-bold animate-pulse flex items-center gap-2 shadow-lg shadow-red-500/10">
-              <span className="w-2 h-2 rounded-full bg-red-500"></span>
-              ⚠️ ANOMALIE : Chute de pression / Fuite suspectée !
-            </div>
+            <div className="bg-red-500/20 border border-red-500 text-red-400 px-5 py-2 rounded-full font-bold animate-pulse">⚠️ ALERTE : FUITE DÉTECTÉE</div>
           ) : (
-            <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-5 py-2 rounded-full font-medium flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              Réseau stable
-            </div>
+            <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-5 py-2 rounded-full">Réseau stable</div>
           )}
         </header>
 
-        {/* SECTION CARTOGRAPHIE */}
         <Card className="bg-slate-900 border-slate-800">
-          <CardHeader>
-            <CardTitle className="text-white">Cartographie du Réseau</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-white">Cartographie et Analyse IA</CardTitle>
+            <div className="flex items-center gap-4">
+              <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                <Upload size={18} />
+                <span>Analyser Plan Réseau</span>
+                <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
+              </label>
+            </div>
           </CardHeader>
           <CardContent>
             <NetworkMap />
           </CardContent>
         </Card>
 
-        {/* SECTION GRAPHIQUES */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          {/* GRAPH_1 : DÉBIT */}
           <div className="bg-slate-900 border border-slate-800/80 p-5 rounded-2xl shadow-xl">
-            <h3 className="text-cyan-400 font-semibold mb-4 flex items-center gap-2 text-lg">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400/50"></span> 
-              Débit du réseau (L/min)
-            </h3>
+            <h3 className="text-cyan-400 font-semibold mb-4">Débit (L/min)</h3>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorFlow" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.35} />
-                      <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
+                <AreaChart data={data}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                  <XAxis dataKey="created_at" tickFormatter={formatTime} stroke="#475569" fontSize={11} tickMargin={10} />
+                  <XAxis dataKey="created_at" tickFormatter={formatTime} stroke="#475569" fontSize={11} />
                   <YAxis stroke="#475569" fontSize={11} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="flow_rate" name="Débit" unit="L/min" stroke="#22d3ee" strokeWidth={2.5} fill="url(#colorFlow)" dot={{ r: 2, fill: '#22d3ee', strokeWidth: 0 }} activeDot={{ r: 5 }} />
+                  <Area type="monotone" dataKey="flow_rate" stroke="#22d3ee" fill="url(#colorFlow)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          {/* GRAPH_2 : PRESSION (Fermeture des balises corrigée) */}
           <div className="bg-slate-900 border border-slate-800/80 p-5 rounded-2xl shadow-xl">
-            <h3 className="text-yellow-400 font-semibold mb-4 flex items-center gap-2 text-lg">
-              <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 shadow-lg shadow-yellow-400/50"></span> 
-              Pression hydraulique (bar)
-            </h3>
+            <h3 className="text-yellow-400 font-semibold mb-4">Pression (bar)</h3>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorPressure" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#facc15" stopOpacity={0.35} />
-                      <stop offset="95%" stopColor="#facc15" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
+                <AreaChart data={data}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                  <XAxis dataKey="created_at" tickFormatter={formatTime} stroke="#475569" fontSize={11} tickMargin={10} />
+                  <XAxis dataKey="created_at" tickFormatter={formatTime} stroke="#475569" fontSize={11} />
                   <YAxis stroke="#475569" fontSize={11} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="pressure" name="Pression" unit="bar" stroke="#facc15" strokeWidth={2.5} fill="url(#colorPressure)" dot={{ r: 2, fill: '#facc15', strokeWidth: 0 }} activeDot={{ r: 5 }} />
+                  <Area type="monotone" dataKey="pressure" stroke="#facc15" fill="url(#colorPressure)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -190,3 +174,22 @@ export default function Dashboard() {
     </div>
   );
 }
+// Dans Dashboard.tsx
+const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (!e.target.files || e.target.files.length === 0) return;
+  const file = e.target.files[0];
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    // Envoi vers votre API Python locale
+    const response = await fetch('http://localhost:8000/analyze-network', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await response.json();
+    console.log("Composants détectés:", result);
+  } catch (error) {
+    console.error("Erreur d'analyse:", error);
+  }
+};

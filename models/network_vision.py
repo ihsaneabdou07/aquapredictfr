@@ -3,6 +3,21 @@ import json
 import os
 import logging
 
+
+def detect_network_components(image_path):
+    model = YOLO('yolov8n.pt') # Remplacez par votre 'best.pt' entraîné
+    results = model(image_path)
+    
+    detected = []
+    for r in results:
+        for box in r.boxes:
+            coords = box.xyxy[0].tolist()
+            detected.append({
+                "type": model.names[int(box.cls[0])],
+                "position": {"x": (coords[0]+coords[2])/2, "y": (coords[1]+coords[3])/2}
+            })
+    return detected
+
 # Configuration du logging pour suivre les erreurs sans polluer la console
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

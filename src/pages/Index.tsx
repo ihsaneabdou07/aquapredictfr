@@ -6,7 +6,7 @@ import {
   Settings, Search, MapPin, User, Hash, HardDrive, ShieldCheck, Download, Zap, Database
 } from 'lucide-react';
 
-import LossSearchPlan from "../components/LossSearchPlan";
+import { NetworkMap } from '@/components/NetworkMap';
 
 // const supabase = createClient(
 //   import.meta.env.VITE_SUPABASE_URL,
@@ -434,8 +434,19 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* NOUVEAU TABLEAU DE RECHERCHE DES PERTES */}
-            <LossSearchPlan />
+            {/* CARTE DU RÉSEAU HYDRAULIQUE */}
+            <div className="bg-[#0F172A]/80 backdrop-blur-md border border-slate-800 p-6 rounded-3xl shadow-xl">
+              <div className="mb-6 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Carte du réseau</p>
+                  <h3 className="text-lg font-bold text-white">Réseau hydraulique</h3>
+                </div>
+                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${leakProbability !== null && leakProbability > 0.5 ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'}`}>
+                  {leakProbability !== null ? (leakProbability > 0.5 ? 'Fuite détectée' : 'Stabilité confirmée') : 'En attente de données'}
+                </span>
+              </div>
+              <NetworkMap leakDetected={leakProbability !== null && leakProbability > 0.5} />
+            </div>
 
           </div>
         )}

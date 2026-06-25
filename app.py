@@ -26,4 +26,17 @@ async def predict(request: Request):
     
     return {"leak_probability": probability}
 
+from fastapi import UploadFile, File
+from models.network_vision import detect_network_components
+
+@app.post("/analyze-network")
+async def analyze_network(file: UploadFile = File(...)):
+    # Sauvegarde temporaire de l'image reçue
+    temp_path = f"temp_{file.filename}"
+    with open(temp_path, "wb") as buffer:
+        buffer.write(await file.read())
+    
+    # Analyse de l'image
+    return detect_network_components(temp_path)
+
 # Pour tester en local avec : uvicorn app:app --reload

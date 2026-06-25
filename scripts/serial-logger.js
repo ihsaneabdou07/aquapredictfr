@@ -3,7 +3,7 @@ import { ReadlineParser } from "@serialport/parser-readline";
 import { WebSocketServer } from "ws";
 
 // ===== CONFIG =====
-const PORT_PATH = "COM3";
+const PORT_PATH = "COM7"; // Remplacez par le port série approprié
 const BAUD_RATE = 115200;
 
 // ===== SERIAL =====

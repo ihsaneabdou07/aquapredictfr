@@ -13,7 +13,6 @@ import { Upload } from "lucide-react";
 import { NetworkMap } from "@/components/NetworkMap";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
 
 interface SensorData {
   id: string;
@@ -54,6 +53,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export default function Dashboard() {
   const [data, setData] = useState<SensorData[]>([]);
   const [lastPrediction, setLastPrediction] = useState<number>(0);
+  const [alertActive, setAlertActive] = useState<boolean>(false);
 
   // Fonction pour gérer l'upload d'image
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,52 +75,8 @@ export default function Dashboard() {
     }
   };
 
-  // Gestion de l'upload d'image
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await fetch('http://localhost:8000/analyze-network', {
-        method: 'POST',
-        body: formData
-      });
-      const result = await response.json();
-      console.log("Composants détectés par IA:", result);
-      alert("Analyse terminée ! Vérifie la console pour les coordonnées.");
-    } catch (error) {
-      console.error("Erreur lors de l'analyse:", error);
-    }
-  };
-
   useEffect(() => {
-    const fetchInitialData = async () => {
-      const { data: initialData } = await supabase
-        .from('sensor_readings')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(30);
-
-      if (initialData && initialData.length > 0) {
-        setData(initialData.reverse());
-        setAlertActive(initialData[initialData.length - 1]?.is_leak_alert || false);
-      }
-    };
-
-    fetchInitialData();
-
-    const subscription = supabase
-      .channel('public:sensor_readings')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sensor_readings' }, 
-        (payload) => {
-          const newData = payload.new as SensorData;
-          setData((currentData) => [...currentData.slice(-29), newData]);
-          setAlertActive(newData.is_leak_alert);
-        }
-
-    return () => { supabase.removeChannel(subscription); };
+    // TODO: connecter ce dashboard à WebSocket ou API locale pour charger les données initiales.
   }, []);
 
   return (
@@ -187,22 +143,3 @@ export default function Dashboard() {
     </div>
   );
 }
-// Dans Dashboard.tsx
-const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  if (!e.target.files || e.target.files.length === 0) return;
-  const file = e.target.files[0];
-  const formData = new FormData();
-  formData.append('file', file);
-
-  try {
-    // Envoi vers votre API Python locale
-    const response = await fetch('http://localhost:8000/analyze-network', {
-      method: 'POST',
-      body: formData
-    });
-    const result = await response.json();
-    console.log("Composants détectés:", result);
-  } catch (error) {
-    console.error("Erreur d'analyse:", error);
-  }
-};

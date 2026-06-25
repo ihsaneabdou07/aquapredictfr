@@ -12,6 +12,8 @@ import { Upload } from "lucide-react";
 
 import { NetworkMap } from "@/components/NetworkMap";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Upload } from "lucide-react";
 
 interface SensorData {
   id: string;
@@ -31,6 +33,22 @@ const formatTime = (timeStr: string) => {
     minute: '2-digit',
     second: '2-digit',
   });
+};
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    return (
+      <div className="bg-slate-900 border border-slate-700 p-3 rounded-lg shadow-xl text-white">
+        <p className="text-xs text-slate-400 mb-2">Relevé à {formatTime(label)}</p>
+        <p className="font-bold text-lg flex items-center gap-2" style={{ color: data.stroke }}>
+          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: data.stroke }}></span>
+          {data.value.toFixed(2)} {data.unit}
+        </p>
+      </div>
+    );
+  }
+  return null;
 };
 
 export default function Dashboard() {
@@ -57,115 +75,134 @@ export default function Dashboard() {
     }
   };
 
+  // Gestion de l'upload d'image
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('http://localhost:8000/analyze-network', {
+        method: 'POST',
+        body: formData
+      });
+      const result = await response.json();
+      console.log("Composants détectés par IA:", result);
+      alert("Analyse terminée ! Vérifie la console pour les coordonnées.");
+    } catch (error) {
+      console.error("Erreur lors de l'analyse:", error);
+    }
+  };
+
   useEffect(() => {
-    const socket = new WebSocket("ws://10.100.10.30:3001");
+    const fetchInitialData = async () => {
+      const { data: initialData } = await supabase
+        .from('sensor_readings')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(30);
 
-    socket.onopen = () => {
-      console.log("✅ Connected WebSocket");
-    };
-
-    socket.onmessage = async (event) => {
-      try {
-        const json = JSON.parse(event.data);
-
-        const flow = json?.data?.flow_rate ?? json.flow_rate ?? json.flow ?? 0;
-        const pressure = json?.data?.pressure ?? json.pressure ?? 0;
-        const temperature = json?.data?.temperature ?? json.temperature ?? json.temp ?? 18.5;
-
-        let leak_probability: number | undefined;
-        try {
-          const response = await fetch('http://localhost:8000/predict', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pressure, flow, temp: temperature }),
-          });
-
-          if (response.ok) {
-            const result = await response.json();
-            leak_probability = typeof result.leak_probability === 'number' ? result.leak_probability : undefined;
-          } else {
-            console.error('Erreur SVM API', response.status);
-          }
-        } catch (err) {
-          console.error('Erreur appel SVM:', err);
-        }
-
-        const newData: SensorData = {
-          id: Math.random().toString(36).slice(2),
-          created_at: new Date().toISOString(),
-          flow_rate: flow,
-          pressure,
-          temperature,
-          is_leak_alert: leak_probability !== undefined && leak_probability >= 0.5,
-          ...(leak_probability !== undefined ? { leak_probability } : {}),
-        };
-
-        setData((current) => [...current.slice(-29), newData]);
-        setLastPrediction((current) => leak_probability ?? current);
-      } catch (err) {
-        console.error('❌ JSON error', err);
+      if (initialData && initialData.length > 0) {
+        setData(initialData.reverse());
+        setAlertActive(initialData[initialData.length - 1]?.is_leak_alert || false);
       }
     };
 
-    socket.onerror = (err) => {
-      console.error('❌ WS ERROR:', err);
-    };
+    fetchInitialData();
 
-    socket.onclose = () => {
-      console.log('❌ WS closed');
-    };
+    const subscription = supabase
+      .channel('public:sensor_readings')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sensor_readings' }, 
+        (payload) => {
+          const newData = payload.new as SensorData;
+          setData((currentData) => [...currentData.slice(-29), newData]);
+          setAlertActive(newData.is_leak_alert);
+        }
 
-    return () => socket.close();
+    return () => { supabase.removeChannel(subscription); };
   }, []);
 
   return (
     <div className="min-h-screen bg-slate-950 p-6 text-slate-200">
       <div className="max-w-6xl mx-auto space-y-8">
         
-        {/* EN-TÊTE AVEC DIAGNOSTIC SVM */}
-        <header className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center border-b border-slate-800 pb-6">
-          <h1 className="text-2xl font-bold text-white col-span-2">ANALYSE HYDRAULIQUE SVM</h1>
-          
-          <div className={`p-4 rounded-xl border ${lastPrediction > 0.5 ? 'bg-red-900/30 border-red-500' : 'bg-emerald-900/30 border-emerald-500'}`}>
-            <p className="text-xs uppercase text-slate-400">Diagnostic IA :</p>
-            <p className="font-bold text-lg">
-              {lastPrediction > 0.5 ? "⚠️ Fuite détectée" : "✅ Réseau stable"}
-            </p>
-            <p className="text-xs opacity-75">
-              {lastPrediction > 0.5 ? "Solution : Vérifier raccordement zone 01" : "Fonctionnement optimal"}
-            </p>
-          </div>
+        <header className="flex justify-between items-center border-b border-slate-800 pb-4">
+          <h1 className="text-3xl font-bold text-white tracking-wide">MONITORING RÉSEAU</h1>
+          {alertActive ? (
+            <div className="bg-red-500/20 border border-red-500 text-red-400 px-5 py-2 rounded-full font-bold animate-pulse">⚠️ ALERTE : FUITE DÉTECTÉE</div>
+          ) : (
+            <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-5 py-2 rounded-full">Réseau stable</div>
+          )}
         </header>
 
-        {/* SECTION CARTOGRAPHIE AVEC UPLOAD */}
         <Card className="bg-slate-900 border-slate-800">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-white">Cartographie du Réseau</CardTitle>
-            <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all">
-              <Upload size={18} />
-              <span>Analyser Plan Réseau</span>
-              <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
-            </label>
+            <CardTitle className="text-white">Cartographie et Analyse IA</CardTitle>
+            <div className="flex items-center gap-4">
+              <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                <Upload size={18} />
+                <span>Analyser Plan Réseau</span>
+                <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
+              </label>
+            </div>
           </CardHeader>
           <CardContent>
             <NetworkMap leakDetected={lastPrediction > 0.5} />
           </CardContent>
         </Card>
 
-        {/* GRAPHIQUE */}
-        <div className="h-64 bg-slate-900 p-4 rounded-xl border border-slate-800">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="created_at" tickFormatter={formatTime} />
-              <YAxis />
-              <Tooltip />
-              <Area type="monotone" dataKey="flow_rate" stroke="#22d3ee" fill="#22d3ee" fillOpacity={0.2} name="Débit" />
-              <Area type="step" dataKey="leak_probability" stroke="#ef4444" fill="transparent" name="Probabilité Fuite" />
-            </AreaChart>
-          </ResponsiveContainer>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-slate-900 border border-slate-800/80 p-5 rounded-2xl shadow-xl">
+            <h3 className="text-cyan-400 font-semibold mb-4">Débit (L/min)</h3>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                  <XAxis dataKey="created_at" tickFormatter={formatTime} stroke="#475569" fontSize={11} />
+                  <YAxis stroke="#475569" fontSize={11} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="flow_rate" stroke="#22d3ee" fill="url(#colorFlow)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="bg-slate-900 border border-slate-800/80 p-5 rounded-2xl shadow-xl">
+            <h3 className="text-yellow-400 font-semibold mb-4">Pression (bar)</h3>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                  <XAxis dataKey="created_at" tickFormatter={formatTime} stroke="#475569" fontSize={11} />
+                  <YAxis stroke="#475569" fontSize={11} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="pressure" stroke="#facc15" fill="url(#colorPressure)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+// Dans Dashboard.tsx
+const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (!e.target.files || e.target.files.length === 0) return;
+  const file = e.target.files[0];
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    // Envoi vers votre API Python locale
+    const response = await fetch('http://localhost:8000/analyze-network', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await response.json();
+    console.log("Composants détectés:", result);
+  } catch (error) {
+    console.error("Erreur d'analyse:", error);
+  }
+};

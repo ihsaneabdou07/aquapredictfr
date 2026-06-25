@@ -20,6 +20,7 @@ interface SensorData {
   pressure: number;
   temperature: number;
   is_leak_alert: boolean;
+  leak_probability?: number;
 }
 
 const formatTime = (timeStr: string) => {
@@ -50,7 +51,7 @@ export default function Index() {
   const [inputMode, setInputMode] = useState<'manuel' | 'intelligent'>('manuel');
   const [isScanning, setIsScanning] = useState(false);
   const [data, setData] = useState<SensorData[]>([]);
-  console.log("DATA STATE:", data);
+  const [leakProbability, setLeakProbability] = useState<number | null>(null);
   const [alertActive, setAlertActive] = useState<boolean>(false);
 
   const [clientConfig, setClientConfig] = useState({ nomClient: '', responsable: '', localisation: '', referenceProjet: '' });
@@ -83,12 +84,11 @@ export default function Index() {
 
   const currentFlow = data[data.length - 1]?.flow_rate || 0;
   const currentPressure = data[data.length - 1]?.pressure || 0;
-  const flowDeviation = Math.max(0, currentFlow - Number(pipeConfig.debitConsigne));
-  const estimatedLossVolume = (flowDeviation * 1440) / 1000;
-
-  let leakProbabilityScore = 12;
-  if (currentPressure > 0 && currentPressure < 2.5 && currentFlow > Number(pipeConfig.debitConsigne)) leakProbabilityScore = 88;
-  else if (flowDeviation > 5) leakProbabilityScore = 45;
+  const currentTemperature = data[data.length - 1]?.temperature || 0;
+  const targetFlow = Number(pipeConfig.debitConsigne);
+  const flowDeviation = Math.max(0, currentFlow - targetFlow);
+  const estimatedLossVolume = flowDeviation > 0 ? (flowDeviation * 1440) / 1000 : 0;
+  const leakProbabilityPercent = leakProbability !== null ? Math.round(leakProbability * 100) : null;
 
 useEffect(() => {
   const socket = new WebSocket("ws://10.100.10.30:3001");
@@ -97,7 +97,7 @@ useEffect(() => {
     console.log("✅ Connected WebSocket");
   };
 
-  socket.onmessage = (event) => {
+  socket.onmessage = async (event) => {
     console.log("📡 RAW:", event.data);
 
     try {
@@ -108,19 +108,49 @@ useEffect(() => {
         json.flow_rate ??
         json.flow ??
         0;
+      const pressure =
+        json?.data?.pressure ??
+        json.pressure ??
+        0;
+      const temperature =
+        json?.data?.temperature ??
+        json.temperature ??
+        json.temp ??
+        18.5;
 
-      const now = new Date().getTime(); // timestamp simple
+      const now = new Date().getTime();
+
+      let leak_probability: number | undefined;
+      try {
+        const response = await fetch(import.meta.env.VITE_SVM_API_URL ?? "http://127.0.0.1:8000/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pressure, flow, temp: temperature }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          leak_probability = typeof result.leak_probability === 'number' ? result.leak_probability : undefined;
+        } else {
+          console.error("Erreur SVM API", response.status);
+        }
+      } catch (err) {
+        console.error("Erreur appel SVM:", err);
+      }
 
       const newPoint: SensorData = {
         id: Math.random().toString(),
         created_at: now,
         flow_rate: flow,
-        pressure: 3.2,
-        temperature: 18.5,
-        is_leak_alert: false
+        pressure,
+        temperature,
+        is_leak_alert: leak_probability !== undefined && leak_probability >= 0.5,
+        ...(leak_probability !== undefined ? { leak_probability } : {}),
       };
 
       setData((prev) => [...prev, newPoint].slice(-30));
+      setLeakProbability(leak_probability ?? null);
+      setAlertActive(leak_probability !== undefined && leak_probability >= 0.5);
 
     } catch (e) {
       console.log("❌ JSON error", e);
@@ -167,12 +197,14 @@ useEffect(() => {
           
           <div className="flex items-center gap-3">
             {alertActive ? (
-              <div className="bg-rose-500/10 border border-rose-500/50 text-rose-400 px-5 py-2.5 rounded-xl font-bold animate-pulse flex items-center gap-3 shadow-[0_0_15px_rgba(244,63,94,0.2)]">
-                <AlertTriangle className="w-5 h-5" /> FUITE SUSPECTÉE
+              <div className="bg-rose-500/10 border border-rose-500/50 text-rose-400 px-5 py-2.5 rounded-xl font-bold animate-pulse flex flex-col gap-2">
+                <div className="flex items-center gap-3"><AlertTriangle className="w-5 h-5" /> FUITE SUSPECTÉE</div>
+                <div className="text-sm text-slate-200">Probabilité : {leakProbability !== null ? `${(leakProbability*100).toFixed(1)}%` : 'En attente'}</div>
               </div>
             ) : (
-              <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-5 py-2.5 rounded-xl font-medium flex items-center gap-3">
-                <ShieldCheck className="w-5 h-5" /> Réseau Nominal
+              <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-5 py-2.5 rounded-xl font-medium flex flex-col gap-2">
+                <div className="flex items-center gap-3"><ShieldCheck className="w-5 h-5" /> Réseau Nominal</div>
+                <div className="text-sm text-slate-200">Probabilité : {leakProbability !== null ? `${(leakProbability*100).toFixed(1)}%` : 'En attente'}</div>
               </div>
             )}
           </div>
@@ -273,13 +305,13 @@ useEffect(() => {
                   <p className="text-xs text-slate-400 uppercase font-bold tracking-widest">Probabilité de Fuite</p>
                 </div>
                 <div className="flex items-end gap-3 mt-2">
-                  <span className={`text-5xl font-black tracking-tighter ${leakProbabilityScore > 70 ? 'text-transparent bg-clip-text bg-gradient-to-br from-rose-400 to-red-600' : leakProbabilityScore > 30 ? 'text-transparent bg-clip-text bg-gradient-to-br from-amber-300 to-orange-500' : 'text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 to-green-500'}`}>
-                    {leakProbabilityScore}%
+                  <span className={`text-5xl font-black tracking-tighter ${leakProbabilityPercent !== null && leakProbabilityPercent > 70 ? 'text-transparent bg-clip-text bg-gradient-to-br from-rose-400 to-red-600' : leakProbabilityPercent !== null && leakProbabilityPercent > 30 ? 'text-transparent bg-clip-text bg-gradient-to-br from-amber-300 to-orange-500' : 'text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 to-green-500'}`}>
+                    {leakProbabilityPercent !== null ? `${leakProbabilityPercent}%` : '--'}
                   </span>
                   <span className="text-xs text-slate-500 font-medium pb-2">Score ML</span>
                 </div>
                 <div className="w-full bg-slate-900 h-2.5 rounded-full mt-6 overflow-hidden border border-slate-800">
-                  <div className={`h-full rounded-full transition-all duration-1000 ${leakProbabilityScore > 70 ? 'bg-gradient-to-r from-red-500 to-rose-400' : leakProbabilityScore > 30 ? 'bg-gradient-to-r from-orange-500 to-amber-400' : 'bg-gradient-to-r from-green-500 to-emerald-400'}`} style={{ width: `${leakProbabilityScore}%` }}></div>
+                  <div className={`h-full rounded-full transition-all duration-1000 ${leakProbabilityPercent !== null && leakProbabilityPercent > 70 ? 'bg-gradient-to-r from-red-500 to-rose-400' : leakProbabilityPercent !== null && leakProbabilityPercent > 30 ? 'bg-gradient-to-r from-orange-500 to-amber-400' : 'bg-gradient-to-r from-green-500 to-emerald-400'}`} style={{ width: `${leakProbabilityPercent ?? 0}%` }}></div>
                 </div>
               </div>
 
@@ -305,15 +337,20 @@ useEffect(() => {
                     <p className="text-xs text-slate-400 uppercase font-bold tracking-widest">Statut Réseau</p>
                   </div>
                   <div className="mt-4">
-                    {leakProbabilityScore > 70 ? (
+                    {leakProbability !== null && leakProbabilityPercent !== null && leakProbabilityPercent > 70 ? (
                       <div className="bg-rose-500/10 border border-rose-500/30 px-4 py-3 rounded-xl flex items-center justify-center gap-3 animate-pulse">
                         <AlertTriangle className="w-6 h-6 text-rose-400" />
                         <span className="text-rose-400 text-sm font-bold tracking-wide">INSPECTION REQUISE</span>
                       </div>
-                    ) : (
+                    ) : leakProbability !== null ? (
                       <div className="bg-emerald-500/5 border border-emerald-500/20 px-4 py-3 rounded-xl flex items-center justify-center gap-3">
                         <CheckCircle className="w-6 h-6 text-emerald-400" />
                         <span className="text-emerald-400 text-sm font-bold tracking-wide">ÉTAT NOMINAL</span>
+                      </div>
+                    ) : (
+                      <div className="bg-slate-900/80 border border-slate-800 px-4 py-3 rounded-xl flex items-center justify-center gap-3">
+                        <ShieldCheck className="w-6 h-6 text-slate-400" />
+                        <span className="text-slate-400 text-sm font-bold tracking-wide">EN ATTENTE DE DONNÉES</span>
                       </div>
                     )}
                   </div>

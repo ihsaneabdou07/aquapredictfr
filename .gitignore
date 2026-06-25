@@ -16,7 +16,7 @@ dist-ssr
 .env
 .env.local
 scripts/.env
-
+.venv
 # Data files
 data.txt
 *.jsonl

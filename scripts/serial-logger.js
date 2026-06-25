@@ -39,7 +39,7 @@ parser.on("data", (data) => {
   try {
     const json = JSON.parse(data);
 
-    // ✅ récupérer proprement les valeurs
+    // ✅ récupérer toutes les valeurs
     const flow =
       json?.data?.flow_rate ??
       json.flow_rate ??
@@ -51,18 +51,24 @@ parser.on("data", (data) => {
       json.pressure ??
       0;
 
-    // ✅ afficher dans terminal
-    console.log("💧 Débit:", flow, "L/min");
-    console.log("📊 Pression:", pressure, "bar");
+    const temperature =
+      json?.data?.temperature ??
+      json.temperature ??
+      0;
 
-    // ✅ construire payload propre pour frontend
+    // ✅ DEBUG dans le terminal Node
+    console.log(
+      `💧 Débit: ${flow} L/min | 📊 Pression: ${pressure} bar | 🌡 Température: ${temperature} °C`
+    );
+
+    // ✅ payload envoyé au frontend
     const payload = {
       flow_rate: flow,
       pressure: pressure,
-      temperature: 18.5 // temporaire
+      temperature: temperature
     };
 
-    // ✅ envoyer à tous les clients WebSocket
+    // ✅ envoi WebSocket
     wss.clients.forEach((client) => {
       if (client.readyState === 1) {
         client.send(JSON.stringify(payload));

@@ -31,3 +31,4 @@ data.txt
 *.njsproj
 *.sln
 *.sw?
+.env

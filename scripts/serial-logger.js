@@ -65,7 +65,9 @@ parser.on("data", (data) => {
     const payload = {
       flow_rate: flow,
       pressure: pressure,
-      temperature: temperature
+      temperature: temperature,
+      created_at: Date.now(),
+      sensor_id: process.env.SERIAL_SENSOR_ID || 'ESP32-1'
     };
 
     // ✅ envoi WebSocket

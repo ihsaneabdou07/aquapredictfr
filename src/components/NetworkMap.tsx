@@ -26,9 +26,9 @@ export function NetworkMap({ leakDetected = false }: NetworkMapProps) {
       <img
         src={networkImage}
         alt="Réseau hydraulique"
-        className="absolute inset-0 h-full w-full object-contain object-center opacity-95"
+        className="absolute inset-0 h-full w-full object-cover object-center opacity-80 filter brightness-90"
       />
-      <div className="absolute inset-0 bg-slate-950/20" />
+      <div className="absolute inset-0 bg-slate-950/60" />
 
       <div className="absolute inset-0">
         {sensors.map((sensor) => (

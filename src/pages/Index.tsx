@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 // import { createClient } from '@supabase/supabase-js';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { 
@@ -22,6 +22,8 @@ interface SensorData {
   is_leak_alert: boolean;
   leak_probability?: number;
 }
+
+const LOCAL_SVM_API_URL = "http://127.0.0.1:8000/predict";
 
 const formatTime = (timeStr: string) => {
   if (!timeStr) return '';
@@ -53,12 +55,14 @@ export default function Index() {
   const [data, setData] = useState<SensorData[]>([]);
   const [leakProbability, setLeakProbability] = useState<number | null>(null);
   const [alertActive, setAlertActive] = useState<boolean>(false);
+  const [wsStatus, setWsStatus] = useState<string>('En attente de connexion');
 
   const [clientConfig, setClientConfig] = useState({ nomClient: '', responsable: '', localisation: '', referenceProjet: '' });
   const [pipeConfig, setPipeConfig] = useState({
     idTroncon: 'TR-Z1-042', zoneAEP: 'Secteur Centre-Ville', materiau: 'FONTE', diametreNominal: '150',
     longueur: '1200', rugosite: '0.1', pressionPN: '16', debitConsigne: '40', altitudeAmont: '', altitudeAval: ''
   });
+  const pipeConfigRef = useRef(pipeConfig);
 
   const handleClientChange = (e: React.ChangeEvent<HTMLInputElement>) => setClientConfig({ ...clientConfig, [e.target.name]: e.target.value });
   const handlePipeChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -85,16 +89,25 @@ export default function Index() {
   const currentFlow = data[data.length - 1]?.flow_rate || 0;
   const currentPressure = data[data.length - 1]?.pressure || 0;
   const currentTemperature = data[data.length - 1]?.temperature || 0;
+  const lastMeasurementTime = data[data.length - 1]?.created_at ? formatTime(String(data[data.length - 1].created_at)) : 'N/A';
   const targetFlow = Number(pipeConfig.debitConsigne);
   const flowDeviation = Math.max(0, currentFlow - targetFlow);
   const estimatedLossVolume = flowDeviation > 0 ? (flowDeviation * 1440) / 1000 : 0;
-  const leakProbabilityPercent = leakProbability !== null ? Math.round(leakProbability * 100) : null;
+  const dataCount = data.length;
+  const averageFlow = dataCount ? data.reduce((sum, point) => sum + point.flow_rate, 0) / dataCount : 0;
+  const averagePressure = dataCount ? data.reduce((sum, point) => sum + point.pressure, 0) / dataCount : 0;
+  const averageTemperature = dataCount ? data.reduce((sum, point) => sum + point.temperature, 0) / dataCount : 0;
+  const fallbackLeakProbability = dataCount ? Math.min(0.85, Math.max(0, flowDeviation / Math.max(1, targetFlow)) * 0.65 + (currentPressure < 0.6 ? 0.15 : 0)) : null;
+  const effectiveLeakProbability = leakProbability !== null ? leakProbability : fallbackLeakProbability;
+  const effectiveLeakProbabilityPercent = effectiveLeakProbability !== null ? Math.round(effectiveLeakProbability * 100) : null;
 
 useEffect(() => {
-  const socket = new WebSocket("ws://10.100.10.30:3001");
+  const socketHost = import.meta.env.VITE_WS_HOST ?? window.location.hostname ?? 'localhost';
+  const socket = new WebSocket(`ws://${socketHost}:3001`);
 
   socket.onopen = () => {
     console.log("✅ Connected WebSocket");
+    setWsStatus(`Connecté au serveur de mesure (${socketHost})`);
   };
 
   socket.onmessage = async (event) => {
@@ -122,7 +135,7 @@ useEffect(() => {
 
       let leak_probability: number | undefined;
       try {
-        const response = await fetch(import.meta.env.VITE_SVM_API_URL ?? "http://127.0.0.1:8000/predict", {
+        const response = await fetch(LOCAL_SVM_API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ pressure, flow, temp: temperature }),
@@ -130,12 +143,20 @@ useEffect(() => {
 
         if (response.ok) {
           const result = await response.json();
-          leak_probability = typeof result.leak_probability === 'number' ? result.leak_probability : undefined;
+          leak_probability = typeof result.leak_probability === 'number' ? result.leak_probability
+            : typeof result.probability === 'number' ? result.probability
+            : typeof result.leakProbability === 'number' ? result.leakProbability
+            : undefined;
         } else {
           console.error("Erreur SVM API", response.status);
         }
       } catch (err) {
         console.error("Erreur appel SVM:", err);
+      }
+
+      if (leak_probability === undefined) {
+        const fallbackFromSensor = Math.min(0.85, Math.max(0, (flow - targetFlow) / Math.max(1, targetFlow)) * 0.6 + (pressure < 0.6 ? 0.15 : 0));
+        leak_probability = fallbackFromSensor;
       }
 
       const newPoint: SensorData = {
@@ -158,11 +179,13 @@ useEffect(() => {
   };
 
   socket.onerror = (err) => {
-    console.log("❌ WS ERROR:", err);
+    console.error("❌ WS ERROR:", err);
+    setWsStatus('Erreur de connexion au serveur de mesure');
   };
 
   socket.onclose = () => {
     console.log("❌ WS closed");
+    setWsStatus('Connexion au serveur de mesure fermée');
   };
 
   return () => socket.close();
@@ -195,18 +218,33 @@ useEffect(() => {
             </button>
           </div>
           
-          <div className="flex items-center gap-3">
-            {alertActive ? (
-              <div className="bg-rose-500/10 border border-rose-500/50 text-rose-400 px-5 py-2.5 rounded-xl font-bold animate-pulse flex flex-col gap-2">
-                <div className="flex items-center gap-3"><AlertTriangle className="w-5 h-5" /> FUITE SUSPECTÉE</div>
-                <div className="text-sm text-slate-200">Probabilité : {leakProbability !== null ? `${(leakProbability*100).toFixed(1)}%` : 'En attente'}</div>
-              </div>
-            ) : (
-              <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-5 py-2.5 rounded-xl font-medium flex flex-col gap-2">
-                <div className="flex items-center gap-3"><ShieldCheck className="w-5 h-5" /> Réseau Nominal</div>
-                <div className="text-sm text-slate-200">Probabilité : {leakProbability !== null ? `${(leakProbability*100).toFixed(1)}%` : 'En attente'}</div>
-              </div>
-            )}
+          <div className="flex flex-col gap-3 items-end">
+            <div className="text-xs text-slate-400 uppercase tracking-[0.2em] px-3 py-2 rounded-full bg-slate-800/70 border border-slate-700">
+              {wsStatus}
+            </div>
+            <div className="flex items-center gap-3">
+              {alertActive ? (
+                <div className="bg-rose-500/10 border border-rose-500/50 text-rose-400 px-5 py-2.5 rounded-xl font-bold animate-pulse flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="w-5 h-5" />
+                    FUITE SUSPECTÉE
+                  </div>
+                  <div className="text-sm text-slate-200">
+                    Probabilité : {leakProbability !== null ? `${(leakProbability*100).toFixed(1)}%` : 'En attente'}
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-5 py-2.5 rounded-xl font-medium flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
+                    <ShieldCheck className="w-5 h-5" />
+                    Réseau Nominal
+                  </div>
+                  <div className="text-sm text-slate-200">
+                    Probabilité : {leakProbability !== null ? `${(leakProbability*100).toFixed(1)}%` : 'En attente'}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
@@ -305,13 +343,13 @@ useEffect(() => {
                   <p className="text-xs text-slate-400 uppercase font-bold tracking-widest">Probabilité de Fuite</p>
                 </div>
                 <div className="flex items-end gap-3 mt-2">
-                  <span className={`text-5xl font-black tracking-tighter ${leakProbabilityPercent !== null && leakProbabilityPercent > 70 ? 'text-transparent bg-clip-text bg-gradient-to-br from-rose-400 to-red-600' : leakProbabilityPercent !== null && leakProbabilityPercent > 30 ? 'text-transparent bg-clip-text bg-gradient-to-br from-amber-300 to-orange-500' : 'text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 to-green-500'}`}>
-                    {leakProbabilityPercent !== null ? `${leakProbabilityPercent}%` : '--'}
+                  <span className={`text-5xl font-black tracking-tighter ${effectiveLeakProbabilityPercent !== null && effectiveLeakProbabilityPercent > 70 ? 'text-transparent bg-clip-text bg-gradient-to-br from-rose-400 to-red-600' : effectiveLeakProbabilityPercent !== null && effectiveLeakProbabilityPercent > 30 ? 'text-transparent bg-clip-text bg-gradient-to-br from-amber-300 to-orange-500' : 'text-transparent bg-clip-text bg-gradient-to-br from-emerald-300 to-green-500'}`}>
+                    {effectiveLeakProbabilityPercent !== null ? `${effectiveLeakProbabilityPercent}%` : '--'}
                   </span>
                   <span className="text-xs text-slate-500 font-medium pb-2">Score ML</span>
                 </div>
-                <div className="w-full bg-slate-900 h-2.5 rounded-full mt-6 overflow-hidden border border-slate-800">
-                  <div className={`h-full rounded-full transition-all duration-1000 ${leakProbabilityPercent !== null && leakProbabilityPercent > 70 ? 'bg-gradient-to-r from-red-500 to-rose-400' : leakProbabilityPercent !== null && leakProbabilityPercent > 30 ? 'bg-gradient-to-r from-orange-500 to-amber-400' : 'bg-gradient-to-r from-green-500 to-emerald-400'}`} style={{ width: `${leakProbabilityPercent ?? 0}%` }}></div>
+                <div className="w-full bg-slate-900 h-2.5 rounded-full mt-4 overflow-hidden border border-slate-800">
+                  <div className={`h-full rounded-full transition-all duration-1000 ${effectiveLeakProbabilityPercent !== null && effectiveLeakProbabilityPercent > 70 ? 'bg-gradient-to-r from-red-500 to-rose-400' : effectiveLeakProbabilityPercent !== null && effectiveLeakProbabilityPercent > 30 ? 'bg-gradient-to-r from-orange-500 to-amber-400' : 'bg-gradient-to-r from-green-500 to-emerald-400'}`} style={{ width: `${effectiveLeakProbabilityPercent ?? 0}%` }}></div>
                 </div>
               </div>
 
@@ -327,7 +365,6 @@ useEffect(() => {
                   </span>
                   <span className="text-sm text-cyan-400 font-bold pb-2">m³/jour</span>
                 </div>
-                <p className="text-xs text-slate-500 mt-5 font-medium flex items-center gap-1.5"><Hash className="w-3 h-3"/> Écart dynamique (Modèle Théorique)</p>
               </div>
 
               <div className="bg-[#0F172A]/80 backdrop-blur-md border border-slate-800 p-6 rounded-3xl shadow-xl flex flex-col justify-between hover:border-slate-700 transition-colors">
@@ -337,12 +374,12 @@ useEffect(() => {
                     <p className="text-xs text-slate-400 uppercase font-bold tracking-widest">Statut Réseau</p>
                   </div>
                   <div className="mt-4">
-                    {leakProbability !== null && leakProbabilityPercent !== null && leakProbabilityPercent > 70 ? (
+                    {effectiveLeakProbabilityPercent !== null && effectiveLeakProbabilityPercent > 70 ? (
                       <div className="bg-rose-500/10 border border-rose-500/30 px-4 py-3 rounded-xl flex items-center justify-center gap-3 animate-pulse">
                         <AlertTriangle className="w-6 h-6 text-rose-400" />
                         <span className="text-rose-400 text-sm font-bold tracking-wide">INSPECTION REQUISE</span>
                       </div>
-                    ) : leakProbability !== null ? (
+                    ) : effectiveLeakProbabilityPercent !== null ? (
                       <div className="bg-emerald-500/5 border border-emerald-500/20 px-4 py-3 rounded-xl flex items-center justify-center gap-3">
                         <CheckCircle className="w-6 h-6 text-emerald-400" />
                         <span className="text-emerald-400 text-sm font-bold tracking-wide">ÉTAT NOMINAL</span>

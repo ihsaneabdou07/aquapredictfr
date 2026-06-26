@@ -39,38 +39,39 @@ parser.on("data", (data) => {
   try {
     const json = JSON.parse(data);
 
-    // ✅ récupérer toutes les valeurs
-    const flow =
-      json?.data?.flow_rate ??
-      json.flow_rate ??
-      json.flow ??
-      0;
+    // ===== EXTRACTION SAFE =====
+    const flow1 = json.flow1 ?? 0;
+    const flow2 = json.flow2 ?? 0;
+    const flow3 = json.flow3 ?? 0;
 
-    const pressure =
-      json?.data?.pressure ??
-      json.pressure ??
-      0;
+    const pressure1 = json.pressure1 ?? 0;
+    const pressure2 = json.pressure2 ?? 0;
+    const pressure3 = json.pressure3 ?? 0;
 
-    const temperature =
-      json?.data?.temperature ??
-      json.temperature ??
-      0;
+    const temperature = json.temperature ?? 0;
 
-    // ✅ DEBUG dans le terminal Node
+    // ===== DEBUG TERMINAL =====
     console.log(
-      `💧 Débit: ${flow} L/min | 📊 Pression: ${pressure} bar | 🌡 Température: ${temperature} °C`
+      `💧 [F1:${flow1.toFixed(2)} | F2:${flow2.toFixed(2)} | F3:${flow3.toFixed(2)}] L/min`
     );
+    console.log(
+      `📊 [P1:${pressure1.toFixed(2)} | P2:${pressure2.toFixed(2)} | P3:${pressure3.toFixed(2)}] bar`
+    );
+    console.log(`🌡 Température: ${temperature.toFixed(2)} °C`);
+    console.log("--------------------------------------------------");
 
-    // ✅ payload envoyé au frontend
+    // ===== PAYLOAD FRONTEND =====
     const payload = {
-      flow_rate: flow,
-      pressure: pressure,
-      temperature: temperature,
-      created_at: Date.now(),
-      sensor_id: process.env.SERIAL_SENSOR_ID || 'ESP32-1'
+      flow1,
+      flow2,
+      flow3,
+      pressure1,
+      pressure2,
+      pressure3,
+      temperature,
     };
 
-    // ✅ envoi WebSocket
+    // ===== ENVOI WEBSOCKET =====
     wss.clients.forEach((client) => {
       if (client.readyState === 1) {
         client.send(JSON.stringify(payload));
@@ -78,7 +79,6 @@ parser.on("data", (data) => {
     });
 
   } catch (err) {
-    // ignore bruit série
     console.log("⚠️ Donnée ignorée:", data);
   }
 });

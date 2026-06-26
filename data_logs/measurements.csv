@@ -1,0 +1,317 @@
+2026-06-25T19:51:16.192838Z,0.66,0.27,23.9,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:17.191852Z,0.57,2.4,23.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:18.192771Z,0.57,0.8,23.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:19.193410Z,0.61,0.27,24.9,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:20.194360Z,0.61,0.27,23.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:21.196430Z,0.6,0.4,21.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:22.198573Z,0.61,0.0,20.1,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:23.199095Z,0.6,0.0,20.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:24.198490Z,0.62,0.0,22.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:25.200197Z,0.66,0.0,23.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:26.200594Z,0.65,0.0,23.9,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:27.200768Z,0.6,0.0,22.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:28.203525Z,0.59,0.0,22.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:29.204469Z,0.57,0.0,22.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:30.205674Z,0.55,0.0,24.1,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:31.206166Z,0.57,0.0,24.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:32.206237Z,0.55,0.0,24.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:33.207783Z,0.59,0.0,22.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:34.208264Z,0.64,1.2,21.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:35.209455Z,0.67,2.53,21.9,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:36.210715Z,0.67,2.53,21.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:37.212848Z,0.66,2.53,21.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:38.212870Z,0.69,2.53,19.9,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:39.213823Z,0.7,2.67,24.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:40.214351Z,0.72,2.53,24.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:41.216257Z,0.71,2.67,19.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:42.217137Z,0.74,2.53,20.9,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:43.218843Z,0.7,2.53,19.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:44.218989Z,0.7,2.67,19.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:45.219713Z,0.64,2.53,19.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:46.219996Z,0.62,2.67,20.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:47.221170Z,0.63,2.53,21.6,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:48.222462Z,0.62,2.67,23.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:49.223579Z,0.64,2.53,22.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:50.225787Z,0.69,2.67,20.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:51.226171Z,0.66,2.67,20.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:52.226595Z,0.68,2.53,20.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:53.227004Z,0.69,2.67,20.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:54.228935Z,0.7,2.67,23.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:55.230251Z,0.7,2.67,20.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:56.230359Z,0.7,2.67,20.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:57.232685Z,0.72,2.67,22.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:58.232870Z,0.72,2.53,23.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:51:59.233411Z,0.7,2.67,20.6,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:00.234154Z,0.69,2.67,19.6,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:01.234847Z,0.68,2.67,24.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:02.238507Z,0.63,2.53,23.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:03.240626Z,0.61,2.67,23.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:04.239221Z,0.63,2.67,21.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:05.240634Z,0.58,2.0,23.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:06.239893Z,0.59,0.13,23.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:07.240796Z,0.66,0.13,22.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:08.242842Z,0.58,0.4,22.1,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:09.242805Z,0.61,0.13,23.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:10.246371Z,0.64,0.0,23.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:11.246065Z,0.66,0.0,22.6,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:12.246678Z,0.56,0.0,21.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:13.247202Z,0.57,0.53,22.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:14.247319Z,0.56,0.8,20.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:15.248438Z,0.57,0.53,19.1,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:16.250077Z,0.57,0.53,19.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:17.250741Z,0.59,0.27,19.1,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:18.253723Z,0.56,0.27,21.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:19.254025Z,0.59,0.0,20.6,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:20.256345Z,0.58,0.13,24.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:21.255252Z,0.59,0.0,23.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:22.258335Z,0.57,0.0,20.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:23.256930Z,0.57,0.0,24.6,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:24.258907Z,0.57,0.0,22.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:25.260368Z,0.59,0.0,21.9,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:26.260613Z,0.57,1.6,24.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:27.260693Z,0.58,0.0,23.9,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:28.262094Z,0.65,0.0,20.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:29.262632Z,0.65,0.0,23.1,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:30.264915Z,0.6,0.0,23.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:31.265246Z,0.63,0.0,20.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:32.266456Z,0.59,0.0,21.9,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:33.267199Z,0.63,0.0,19.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:34.267510Z,0.57,0.0,24.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:35.268859Z,0.55,0.0,19.9,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:36.269825Z,0.57,0.0,22.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:37.270940Z,0.58,0.0,23.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:38.272697Z,0.62,0.0,19.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:39.273258Z,0.65,0.0,19.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:40.274766Z,0.57,0.0,24.1,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:41.274498Z,0.65,0.0,24.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:42.275761Z,0.59,0.0,22.1,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:43.276493Z,0.55,0.0,24.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:44.277665Z,0.54,0.0,24.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:45.281609Z,0.61,0.0,20.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:46.280888Z,0.55,0.0,19.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:47.281316Z,0.62,0.0,22.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:48.280988Z,0.59,0.0,22.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:49.282418Z,0.63,0.0,22.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:50.283342Z,0.6,0.0,22.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:51.283996Z,0.61,0.0,19.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:52.286461Z,0.62,0.0,24.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:53.288326Z,0.61,0.0,19.6,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:54.288640Z,0.61,0.0,24.6,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:55.288834Z,0.61,0.0,23.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:56.289225Z,0.58,0.0,23.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:57.289867Z,0.62,0.0,21.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:58.291686Z,9.45,0.0,24.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:52:59.292572Z,8.62,0.0,20.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:00.294965Z,9.2,0.0,19.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:01.295371Z,12.0,0.0,19.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:02.295062Z,12.0,0.0,20.1,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:03.297429Z,11.89,0.0,23.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:04.297121Z,10.46,0.0,23.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:05.297811Z,9.27,0.0,24.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:06.300746Z,8.69,0.0,22.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:07.302101Z,8.66,0.0,24.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:08.302263Z,8.67,0.0,22.1,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:09.302463Z,8.78,0.0,22.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:10.302939Z,8.44,0.0,20.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:11.303964Z,8.94,0.0,21.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:12.304599Z,9.09,0.0,20.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:13.307819Z,10.1,0.0,23.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:14.307973Z,11.37,0.0,22.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:15.309608Z,12.0,0.0,19.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:16.308840Z,12.0,0.0,19.1,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:17.309908Z,12.0,0.0,21.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:18.312852Z,11.66,0.0,20.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:19.311915Z,10.27,0.0,24.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:20.314229Z,9.09,0.0,22.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:21.316462Z,8.67,0.0,20.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:22.315188Z,8.77,0.0,20.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:23.315435Z,8.72,0.0,20.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:24.316916Z,8.76,0.0,20.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:25.317240Z,8.8,0.0,19.1,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:26.319634Z,9.09,0.0,22.9,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:27.321018Z,9.62,0.0,21.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:28.322384Z,10.61,0.0,21.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:29.322273Z,12.0,0.0,22.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:30.322805Z,12.0,0.0,19.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:31.323421Z,12.0,0.0,22.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:32.324949Z,12.0,0.0,21.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:33.327407Z,10.42,0.0,21.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:34.326779Z,9.11,0.0,21.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:35.328780Z,6.46,0.0,23.6,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:36.328820Z,8.67,0.0,19.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:37.329070Z,8.74,0.0,21.9,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:38.330580Z,8.86,0.0,23.6,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:39.331585Z,8.96,0.0,19.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:40.332752Z,9.14,0.0,24.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:41.333563Z,9.42,0.0,22.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:42.335014Z,10.18,0.0,19.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:43.335584Z,11.44,0.0,22.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:44.338091Z,12.0,0.0,23.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:45.337135Z,12.0,0.0,21.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:46.338256Z,12.0,0.0,23.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:47.339302Z,11.76,0.0,24.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:48.341523Z,10.41,0.0,20.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:49.342155Z,9.18,0.0,23.6,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:50.342526Z,8.77,0.0,22.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:51.343644Z,8.77,0.0,22.6,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:52.344417Z,8.79,0.0,20.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:53.345089Z,8.81,0.0,20.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:54.346033Z,8.86,0.0,22.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:55.348884Z,8.95,0.0,21.3,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:56.349195Z,9.13,0.0,24.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:57.349212Z,9.38,0.0,21.9,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:58.349860Z,10.07,0.0,21.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:53:59.351574Z,11.09,0.0,23.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:00.352022Z,12.0,0.0,24.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:01.353154Z,12.0,0.0,21.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:02.356841Z,12.0,0.0,19.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:03.356190Z,12.0,0.0,20.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:04.356502Z,11.03,0.0,21.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:05.357643Z,9.81,0.0,24.1,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:06.358513Z,8.99,0.0,20.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:07.359334Z,8.67,0.0,23.4,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:08.361194Z,8.76,0.0,21.5,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:09.362737Z,8.77,0.0,20.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:10.363437Z,8.84,0.0,24.9,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:11.363367Z,8.82,0.0,21.1,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:12.364427Z,8.97,0.0,22.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:13.365088Z,9.2,0.0,21.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:14.368563Z,9.53,0.0,20.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:15.366886Z,10.17,0.0,21.7,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:16.367860Z,11.08,0.0,19.6,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:17.368724Z,12.0,0.0,24.1,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:18.371816Z,12.0,0.0,21.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:19.370673Z,12.0,0.0,19.8,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:20.371686Z,12.0,0.0,21.2,0.95,Fuite imminente (≤6h),critical
+2026-06-25T19:54:21.372306Z,11.98,0.0,24.0,0.95,Fuite imminente (≤6h),critical
+2026-06-25T20:00:10.338289Z,0.61,0.8,21.9,0.06510720814859355,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:11.337874Z,0.62,0.53,23.6,0.06530385469621247,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:12.338347Z,0.6,0.0,22.7,0.07018382777565388,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:13.339711Z,0.6,0.0,19.4,0.06127641306939845,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:14.341612Z,0.6,0.13,24.7,0.06071035345093873,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:15.341873Z,0.56,0.0,20.6,0.07231548580593967,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:16.344232Z,0.58,0.0,24.9,0.09184682289972489,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:17.343779Z,0.61,0.0,22.9,0.052063143333186554,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:18.344512Z,0.59,0.0,20.1,0.0661588867391547,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:19.345434Z,0.57,0.0,24.0,0.06756094562024169,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:20.346570Z,0.61,0.0,21.4,0.08751993413417555,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:21.347488Z,1.39,2.27,23.0,0.086743440874335,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:22.348897Z,0.74,0.27,19.9,0.08663303110669301,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:23.350875Z,0.75,0.0,22.5,0.0612145346092014,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:24.350715Z,0.62,0.13,21.3,0.06289356437809682,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:25.352218Z,0.65,0.0,20.8,0.09408013465094454,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:26.352328Z,0.61,0.0,24.7,0.0526890971814055,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:27.354058Z,0.72,0.0,19.1,0.07822766230511985,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:28.354128Z,0.72,0.0,20.7,0.07781345015729069,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:29.356772Z,0.74,0.67,24.0,0.07728852892137411,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:30.357035Z,0.7,2.93,24.9,0.08351027549908271,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:31.357806Z,0.7,2.8,24.4,0.08892647622104827,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:32.359717Z,0.7,2.8,23.9,0.08484683317174524,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:33.359139Z,0.76,2.67,21.8,0.07257648737300931,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:34.360349Z,0.77,2.67,22.2,0.05406908525662781,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:35.361083Z,0.86,2.8,19.4,0.05741602423603273,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:36.364162Z,0.81,2.67,21.7,0.0619796464577334,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:37.364033Z,0.9,2.67,20.7,0.07612990501673106,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:38.364634Z,0.9,2.67,21.7,0.09380005918466564,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:39.365488Z,0.86,2.67,19.4,0.06958246618427873,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:40.366376Z,0.99,2.53,20.4,0.09527100295612162,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:41.367217Z,0.97,2.67,21.8,0.09834208147060927,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:42.368446Z,1.04,2.67,20.9,0.06566033181037956,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:43.369882Z,1.02,2.67,23.5,0.05162128300800095,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:44.371566Z,0.99,1.6,20.3,0.09137691973805172,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:45.372103Z,1.08,2.67,24.8,0.06348841524242017,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:46.372450Z,0.79,2.67,20.3,0.09795202763729388,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:47.373066Z,0.78,2.53,21.0,0.08801161369129011,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:48.374026Z,0.75,2.67,23.1,0.09046430365145879,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:49.374819Z,0.75,2.67,20.0,0.08175590518152649,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:50.378040Z,0.74,2.4,21.4,0.08142197758114787,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:51.378502Z,0.69,1.47,22.3,0.08537503680597047,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:52.378417Z,0.64,0.27,22.7,0.06572170474225118,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:53.379410Z,0.69,0.13,20.5,0.08918656027845015,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:54.379982Z,0.57,0.53,22.5,0.09125532936120655,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:55.380938Z,12.0,0.27,19.2,0.09269872339248095,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:56.382198Z,0.72,2.0,20.1,0.09594015659764962,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:57.383608Z,1.11,2.53,21.0,0.07020063323922121,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:58.385234Z,1.05,2.67,19.2,0.07685651740488916,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:00:59.385255Z,0.94,2.67,21.9,0.07159549510071665,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:00.386359Z,0.99,2.53,20.5,0.05100933422577356,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:01.387345Z,0.86,2.67,24.2,0.09723005581614524,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:02.388169Z,0.88,2.67,19.0,0.07606458372441506,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:03.388686Z,0.88,2.67,24.3,0.05325955651234623,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:04.391771Z,0.94,2.67,21.9,0.07488354451843486,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:05.392367Z,0.96,2.8,24.2,0.06078127924150517,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:06.392327Z,0.88,2.67,24.2,0.07551915076080055,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:07.393386Z,0.91,2.67,20.6,0.08722798907099548,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:08.393690Z,0.92,2.53,24.4,0.06933277033979997,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:09.394684Z,0.76,2.67,22.2,0.09100424284288627,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:10.396794Z,0.63,2.67,24.6,0.07255075821621526,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:11.397573Z,0.68,2.67,24.0,0.07186137659553321,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:12.398857Z,0.67,2.67,21.8,0.06411093106393576,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:13.399237Z,0.65,2.67,22.1,0.09390429870737577,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:14.399675Z,0.7,2.67,22.3,0.08483852965998337,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:15.400728Z,0.67,2.67,23.6,0.055538135506892246,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:16.403518Z,0.7,2.67,21.4,0.08055236616115838,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:17.403513Z,0.7,2.67,20.8,0.07424044696185972,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:18.405577Z,0.7,2.67,22.4,0.07450890092564258,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:19.405717Z,0.69,2.67,21.6,0.05567201965047147,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:20.406884Z,0.75,2.67,22.4,0.055857763440324976,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:21.407318Z,0.73,2.8,22.4,0.07218351461799298,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:22.407787Z,0.64,2.67,24.4,0.07188122557461213,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:23.409058Z,0.69,2.67,20.0,0.09287605550295572,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:24.410672Z,0.67,2.67,22.2,0.054395516916786554,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:25.411500Z,0.69,2.67,19.2,0.09632041768433264,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:26.413646Z,0.68,2.67,24.2,0.07657196534136304,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:27.412818Z,0.7,2.67,22.3,0.08096564146010554,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:28.413861Z,0.69,2.67,24.7,0.06166404361383002,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:29.414449Z,0.6,2.67,22.8,0.0861716141731878,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:30.415927Z,0.66,2.67,23.3,0.08499012761568792,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:31.416773Z,0.69,2.8,21.8,0.06747356329307941,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:32.417872Z,0.65,2.67,23.5,0.06945169524562952,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:33.419114Z,0.66,2.67,19.6,0.0768924597668385,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:34.419519Z,0.69,2.67,19.5,0.09254412578120426,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:35.420460Z,0.67,2.67,19.3,0.06525264613972326,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:36.422211Z,0.63,2.67,19.2,0.05806217690540589,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:37.422572Z,0.65,2.8,21.7,0.07409822265979833,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:38.424511Z,0.67,2.67,24.1,0.05947871031918311,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:39.433755Z,0.65,2.67,22.9,0.07505113648207276,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:40.427517Z,0.66,2.67,21.3,0.0627597257399531,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:41.426675Z,0.65,2.8,22.7,0.0894246372392608,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:42.427406Z,0.6,1.07,22.9,0.05005434619617259,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:43.428866Z,0.57,0.13,20.9,0.08440228442671609,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:44.429711Z,0.57,0.0,20.2,0.07626205822598894,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:45.431559Z,0.53,0.4,24.4,0.07398091389129852,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:46.432788Z,0.0,0.4,24.3,0.09947354959166925,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:47.433505Z,2.58,0.67,21.2,0.05185057671324382,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:48.433589Z,0.0,1.47,21.0,0.07724686421404577,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:49.434781Z,0.72,1.2,22.7,0.07623365506487895,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:50.435163Z,0.0,0.0,19.8,0.08061169020506638,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:51.436467Z,0.0,0.0,23.2,0.06254322022768975,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:52.437898Z,1.76,0.0,20.0,0.07278113179283599,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:53.441781Z,4.4,0.0,20.1,0.06244083830752345,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:54.440442Z,0.0,0.0,20.0,0.0818627301139942,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:55.440559Z,0.0,0.0,24.7,0.07873469313197705,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:56.441762Z,0.0,0.0,22.4,0.07217344962828126,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:57.443031Z,0.0,0.0,22.5,0.09868465408233391,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:58.444450Z,0.0,0.0,24.7,0.09875238352047912,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:01:59.443946Z,0.0,0.0,20.8,0.08719931558722577,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:00.446931Z,0.0,0.0,21.0,0.0673206659120517,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:01.447027Z,0.0,0.0,23.6,0.05931567453671924,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:02.447181Z,0.0,0.0,20.0,0.07613470727574354,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:03.448323Z,0.0,0.0,23.8,0.06197536555901784,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:04.449688Z,0.0,0.0,20.1,0.053534995884888026,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:05.449968Z,0.0,0.0,23.2,0.0642241414510107,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:06.451677Z,0.0,0.0,24.3,0.09702834597580431,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:07.453690Z,0.0,0.0,22.1,0.09492979357010242,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:08.454178Z,0.0,0.0,19.1,0.08330181096688646,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:09.454082Z,0.0,0.0,21.8,0.05636886053791586,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:10.455343Z,0.0,0.0,23.0,0.0500174648885756,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:11.456765Z,0.0,0.0,24.3,0.06462063683593278,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:12.457081Z,0.0,0.0,24.2,0.07136131707804891,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:13.458550Z,0.0,0.0,21.4,0.07978297042668255,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:14.461727Z,0.0,0.0,24.7,0.05832427651609963,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:15.464165Z,0.0,0.0,20.0,0.08101431152432723,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:16.462562Z,0.0,0.0,23.2,0.06505080381128717,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:17.461872Z,0.0,0.0,24.7,0.05124702474786169,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:18.463947Z,0.0,0.0,24.6,0.0850122164130871,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:19.463711Z,0.0,0.0,21.6,0.06056660030394772,Réseau stable (aucune fuite anticipée),normal
+2026-06-25T20:02:20.465173Z,0.0,0.0,20.8,0.060993954239457554,Réseau stable (aucune fuite anticipée),normal

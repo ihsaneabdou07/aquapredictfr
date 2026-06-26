@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from models.inference import get_leak_probability
+from models.recorder import record_measurement, compute_horizon_label, compute_network_status
 
 app = FastAPI()
 app.add_middleware(
@@ -23,7 +24,14 @@ async def predict(request: Request):
     
     # Appel à votre modèle
     probability = get_leak_probability(pressure, flow, temp)
-    
+
+    # Enregistrer la mesure et les statistiques pour reporting
+    try:
+        record_measurement(pressure=pressure, flow=flow, temperature=temp, probability=probability)
+    except Exception:
+        # ne pas faire échouer la route si l'enregistrement échoue
+        pass
+
     return {"leak_probability": probability}
 
 from fastapi import UploadFile, File

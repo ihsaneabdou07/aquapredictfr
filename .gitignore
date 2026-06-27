@@ -20,6 +20,29 @@ scripts/.env
 # Data files
 data.txt
 *.jsonl
+data_logs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+*.egg-info/
+
+# ML model artifacts (use DVC or cloud storage instead)
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.onnx
+
+# Package manager alternatives (project uses npm)
+bun.lock
+bun.lockb
+uv.lock
 
 # Editor directories and files
 .vscode/*
@@ -31,4 +54,3 @@ data.txt
 *.njsproj
 *.sln
 *.sw?
-.env

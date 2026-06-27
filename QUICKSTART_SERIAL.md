@@ -1,41 +1,19 @@
-# AquaPredict - Configuration Rapide (Acquisition Série)
+# AquaPredict - Démarrage Rapide (Acquisition Série)
 
-## 1️⃣ Copier le fichier d'exemple
+## 1. Copier le fichier d'exemple
 
 ```powershell
 cp scripts\.env.example scripts\.env
 ```
 
-## 2️⃣ Éditer `scripts\.env`
-
-Ouvre et remplis avec tes paramètres:
+## 2. Éditer `scripts\.env`
 
 ```env
-# Port COM où est branché ton ESP32/capteur
-SERIAL_PORT=COM3
-
-# Vitesse du port (vérifier avec ton firmware)
-SERIAL_BAUD=115200
-
-# Fichier de log local
-SERIAL_OUTPUT_FILE=data.txt
-
-# === SUPABASE (optionnel mais recommandé) ===
-
-# Activer pour envoyer vers le cloud
-SERIAL_SEND_TO_SUPABASE=true
-
-# URL complète de ta fonction Edge
-SUPABASE_FUNCTION_URL=https://YOUR-PROJECT-REF.supabase.co/functions/v1/hydraulic-data-receiver
-
-# Clé anon depuis Supabase > Settings > API
-SUPABASE_ANON_KEY=eyJhbGci...
-
-# Tronçon par défaut si absent de la trame
-ID_TRONCON=TR-Z1-042
+SERIAL_PORT=COM7      # Port COM de ton ESP32 (Windows) ou /dev/ttyUSB0 (Linux)
+SERIAL_BAUD=115200    # Vitesse du port (doit correspondre au firmware)
 ```
 
-## 3️⃣ Lancer l'acquisition
+## 3. Lancer l'acquisition
 
 ```powershell
 npm run data:serial
@@ -43,53 +21,48 @@ npm run data:serial
 
 ### Sortie attendue
 
-```powershell
-[serial] Port ouvert: COM3 @ 115200
-[serial] Sauvegarde dans: data.txt
-[serial] Envoi Supabase: active
-Debit: 42.5 L/min
-[serial] Envoi Supabase OK
+```
+[serial] Connecté sur COM7
+[WS] Client connecté
+💧 [F1:42.50 | F2:38.10 | F3:41.20] L/min
+📊 [P1:3.20 | P2:3.10 | P3:3.15] bar
+🌡 Température: 22.10 °C
+--------------------------------------------------
 ```
 
-## 🔧 Format capteur accepté
+## Format capteur attendu
 
-Ton capteur (ESP32) doit envoyer une ligne JSON par mesure :
+L'ESP32 doit envoyer une ligne JSON par mesure via le port série :
 
 ```json
-{"flow_rate": 42.5, "pressure": 3.2, "temperature": 22.1}
+{"flow1": 42.5, "flow2": 38.1, "flow3": 41.2, "pressure1": 3.2, "pressure2": 3.1, "pressure3": 3.15, "temperature": 22.1}
 ```
 
-**Noms de champs acceptés :**
+Les valeurs manquantes sont remplacées par `0`.
 
-- Débit: `flow_rate`, `flow`, `debit`
-- Pression: `pressure`, `pression`
-- Température: `temperature`, `temp`
-- ID tronçon: `idTroncon` (ou variable env ID_TRONCON)
+## Architecture locale
 
-## 📊 Vérifier les données
-
-Les mesures sont sauvegardées dans `data.txt` (format JSONL) :
-
-```bash
-# Voir les 5 dernières mesures
-tail -n 5 data.txt
-
-# Compter les mesures
-wc -l data.txt
+```
+ESP32 (USB/Série)
+    │
+    ▼
+scripts/serial-logger.js   (port série → WebSocket)
+    │
+    ▼  ws://localhost:3001
+React Dashboard (src/pages/Index.tsx)
+    │
+    ▼  POST http://localhost:8000/predict
+app.py (FastAPI - modèle SVM)
+    │
+    ▼  POST http://localhost:4000/alert
+server.js (alertes email)
 ```
 
-## 🚀 Troubleshooting
+## Troubleshooting
 
 | Problème | Solution |
-| --- | --- |
-| Port non trouvé | Vérifier SERIAL_PORT et brancher le device |
-| Erreur Supabase 401 | Vérifier SUPABASE_ANON_KEY |
-| Ligne d'erreur "Donnee ignoree" | Vérifier format JSON du capteur |
-| Rien ne s'écrit dans data.txt | Vérifier les permissions du répertoire |
-
-## 📝 Notes
-
-- Les données locales (data.txt) ne sont **pas** commitées (ajoutées à .gitignore)
-- Les variables d'environnement aussi (scripts/.env ignoré)
-- Le script continue même si Supabase n'est pas accessible
-- Les lignes mal formées sont silencieusement ignorées
+|---|---|
+| Port non trouvé | Vérifier `SERIAL_PORT` dans `scripts/.env` et que l'ESP32 est branché |
+| WS pas connecté | Vérifier que `npm run data:serial` est lancé avant d'ouvrir le dashboard |
+| Données ignorées | Vérifier que le firmware envoie du JSON valide sur le port série |
+| Pas de prédiction ML | Vérifier que `python app.py` est lancé sur le port 8000 |

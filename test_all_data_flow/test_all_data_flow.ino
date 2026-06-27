@@ -10,7 +10,13 @@ float flow3 = 0;
 // Pins débit
 const int flowPin1 = 4;
 const int flowPin2 = 5;
-const int flowPin3 = 18;
+const int flowPin3 = 27;
+
+
+float offset1 = 1 - 0.62;
+float offset2 = 1- 0.62;
+float offset3 = 1- 0.00;
+
 
 // calibration (adapter selon capteur)
 const float calibrationFactor = 7.5;
@@ -79,13 +85,14 @@ void loop() {
     int raw2 = analogRead(pressurePin2);
     int raw3 = analogRead(pressurePin3);
 
-    float pressure1 = (raw1 / 4095.0) * maxPressurePa / 100000.0; // en bar
-    float pressure2 = (raw2 / 4095.0) * maxPressurePa / 100000.0;
-    float pressure3 = (raw3 / 4095.0) * maxPressurePa / 100000.0;
+    
+float pressure1 = ((raw1 / 4095.0) * maxPressurePa / 100000.0) + offset1; // en bar
+float pressure2 = ((raw2 / 4095.0) * maxPressurePa / 100000.0) + offset2;
+float pressure3 = ((raw3 / 4095.0) * maxPressurePa / 100000.0) + offset3;
 
-    // ===== TEMP SIMULÉE =====
+    // ===== TEMPERATURE SIMULÉE =====
     float t = millis() / 1000.0;
-    float temperature = 22 + sin(t * 0.1) * 2;
+    float temperature = 22 + sin(t * 0.1) * 0.1;
 
     // ===== JSON =====
     Serial.print("{");
@@ -103,16 +110,6 @@ void loop() {
     Serial.println("}");
 
     // DEBUG console
-    Serial.println("------");
-    Serial.print("Flow1: "); Serial.println(flow1);
-    Serial.print("Flow2: "); Serial.println(flow2);
-    Serial.print("Flow3: "); Serial.println(flow3);
-
-    Serial.print("P1: "); Serial.println(pressure1);
-    Serial.print("P2: "); Serial.println(pressure2);
-    Serial.print("P3: "); Serial.println(pressure3);
-
-    Serial.println("------");
 
     lastTime = millis();
   }

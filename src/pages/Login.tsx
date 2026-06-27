@@ -18,7 +18,8 @@ const Login = () => {
   setLoading(true);
 
   // ✅ login simple (sans supabase)
-  if (email === "admin@test.com" && password === "1234") {
+  if (email === "client@test.com" && password === "12345678") {
+    localStorage.setItem("user", email); // ✅ IMPORTANT
     navigate("/"); // accès au dashboard
   } else {
     toast({

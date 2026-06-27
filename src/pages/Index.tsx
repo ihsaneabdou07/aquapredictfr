@@ -213,6 +213,22 @@ useEffect(() => {
         is_leak_alert: leak_probability !== undefined && leak_probability >= 0.5,
         ...(leak_probability !== undefined ? { leak_probability } : {}),
       };
+      if (leak_probability !== undefined && leak_probability >= 0.7) {
+
+        console.log("🚨 Fuite détectée, envoi backend...");
+
+        fetch("http://localhost:4000/alert", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: "Fuite détectée sur le réseau",
+            probability: leak_probability,
+            time: new Date().toISOString()
+          }),
+        });
+      }
 
       setData((prev) => [...prev, newPoint].slice(-30));
       if (leak_probability !== undefined) {
@@ -236,6 +252,27 @@ useEffect(() => {
   };
 
   return () => socket.close();
+}, []);
+
+useEffect(() => {
+  const alertSocket = new WebSocket("ws://localhost:4001");
+
+  alertSocket.onmessage = (event) => {
+    const alert = JSON.parse(event.data);
+
+    alert("🚨 ALERTE CLIENT:\n" + alert.message);
+
+    console.log("ALERTE REÇUE:", alert);
+  };
+
+  return () => alertSocket.close();
+}, []);
+useEffect(() => {
+  const user = localStorage.getItem("user");
+
+  if (!user) {
+    window.location.href = "/login";
+  }
 }, []);
 
   return (

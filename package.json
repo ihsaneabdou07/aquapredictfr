@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "data:serial": "node scripts/serial-logger.js",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "start": "node server.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -53,11 +54,13 @@
     "date-fns": "^3.6.0",
     "dotenv": "^17.4.2",
     "embla-carousel-react": "^8.6.0",
+    "express": "^5.2.1",
     "framer-motion": "^12.35.1",
     "input-otp": "^1.4.2",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
+    "nodemailer": "^9.0.1",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
@@ -102,5 +105,18 @@
   },
   "overrides": {
     "esbuild": "^0.28.1"
-  }
+  },
+  "description": "AquaPredict is a React + TypeScript dashboard for monitoring hydraulic metrics (debit, pressure, temperature) with charts, alerts, and simulation/realtime modes.",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ihsaneabdou07/aquapredictfr.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ihsaneabdou07/aquapredictfr/issues"
+  },
+  "homepage": "https://github.com/ihsaneabdou07/aquapredictfr#readme"
 }

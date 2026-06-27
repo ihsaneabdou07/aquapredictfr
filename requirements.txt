@@ -1,10 +1,7 @@
 fastapi
 uvicorn
 joblib
-scikit-learn
-pandas
-numpy
-imblearn
-waitress
-
-
+ultralytics
+numpy==1.26.4
+scipy==1.11.4
+scikit-learn==1.3.2

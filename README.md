@@ -1,136 +1,85 @@
 # AquaPredict
 
-AquaPredict is a React + TypeScript dashboard for monitoring hydraulic metrics (debit, pressure, temperature) with charts, alerts, and simulation/realtime modes.
+AquaPredict est une plateforme de supervision hydraulique (débit, pression, température) avec détection de fuite, alertes et visualisation en temps réel.
 
-## Stack
+## Services du projet
 
-- Vite
-- React
-- TypeScript
-- Tailwind CSS
-- shadcn/ui
-- Supabase Functions
+| Service | Rôle | Commande | Port par défaut |
+| --- | --- | --- | --- |
+| Frontend (Vite + React) | Interface web | `npm run dev` | `8080` |
+| Backend Node (Express) | Auth, alertes, API locale | `npm run start` | `4000` |
+| WebSocket Node | Push des alertes temps réel | inclus dans `npm run start` | `4001` |
+| API IA (FastAPI) | Prédiction fuite + analyse réseau | `uvicorn app:app --reload --port 7860` | `7860` |
+| Logger série (optionnel) | Lecture capteur via port série + envoi Supabase | `npm run data:serial` | - |
 
-## Prerequisites
+## Prérequis
 
 - Node.js 20+
 - npm 10+
+- Python 3.10+
 
-## Getting Started
-
-```sh
-npm install
-npm run dev
-
-## Getting Started
+## Installation
 
 ```sh
 npm install
+pip install -r requirements.txt
+```
+
+## Démarrage rapide (tous les serveurs)
+
+Lancer chaque service dans un terminal séparé depuis la racine du projet.
+
+### Terminal 1 — Frontend
+
+```sh
 npm run dev
 ```
 
-The app runs by default on port 8080.
-
-## Available Scripts
+### Terminal 2 — Backend Node (API + WebSocket)
 
 ```sh
-npm run dev      # Start development server
-npm run lint     # Run ESLint
-npm run test     # Run unit tests (Vitest)
-npm run build    # Build for production
-npm run preview  # Preview production build
+npm run start
 ```
 
-## Project Structure
+### Terminal 3 — API IA (FastAPI)
 
-- src/pages: route-level pages
-- src/components: reusable UI and dashboard components
-- src/hooks: application hooks and data logic
-- src/integrations/supabase: Supabase client and generated types
-- supabase/functions/hydraulic-data-receiver: backend endpoint used by the app
+```sh
+uvicorn app:app --reload --port 7860
+```
 
-## Real-Time Data Acquisition (Serial Port)
+## Acquisition de données série (optionnel)
 
-### Overview
-
-The project includes a Node.js script to capture hydraulic measurements directly from IoT devices via serial port (e.g., ESP32 with sensors).
-
-### Quick Start
-
-1. **Copy the environment template:**
+1. Copier le fichier d'environnement :
 
    ```sh
    cp scripts/.env.example scripts/.env
    ```
 
-2. **Edit `scripts/.env` with your configuration:**
-
-   ```env
-   SERIAL_PORT=COM3                    # Your COM port (COM3, /dev/ttyUSB0, etc.)
-   SERIAL_BAUD=115200                  # Baud rate
-   SERIAL_OUTPUT_FILE=data.txt         # Local JSONL file
-   SERIAL_SEND_TO_SUPABASE=true        # Enable Supabase sync
-   SUPABASE_FUNCTION_URL=https://...   # Your edge function URL
-   SUPABASE_ANON_KEY=your_key          # Supabase anonymous key
-   ```
-
-3. **Start capturing data:**
+2. Adapter `scripts/.env` (port série, URL Supabase, clé API, etc.).
+3. Lancer l'acquisition :
 
    ```sh
    npm run data:serial
    ```
 
-### Features
+Guide détaillé : `QUICKSTART_SERIAL.md`
 
-- **Local logging**: Saves all measurements to JSONL file (one per line)
-- **Supabase sync**: Automatically sends data to your backend function
-- **Flexible input**: Accepts `flow_rate`/`flow`/`debit`, `pressure`/`pression`, `temperature`/`temp`
-- **Error resilient**: Ignores malformed lines, continues on network errors
-- **Configurable**: All ports, baud rates, and endpoints via environment variables
-
-### Alternative Data Paths
-
-If COM3 is already used by Arduino IDE or the Serial Monitor, you can avoid serial capture entirely:
-
-- **Wi-Fi**: have the ESP32 send the same JSON payload directly to the Supabase Edge Function over HTTP.
-- **Bluetooth**: use BLE only if you want a local bridge or browser-based reader; it is less convenient for continuous logging than Wi-Fi.
-
-Recommended Wi-Fi flow:
-
-1. ESP32 formats each measurement as JSON.
-2. ESP32 sends a `POST` request to the existing Supabase Edge Function.
-3. The function stores the measurement in the database and can trigger alerts.
-
-Example payload:
-
-```json
-{"flow_rate": 42.5, "pressure": 3.2, "temperature": 22.1, "idTroncon": "TR-Z1-042"}
-```
-
-If you want, I can also add an ESP32 Wi-Fi example that posts directly to the Supabase endpoint.
-
-### Expected Sensor Format
-
-Your IoT device should transmit JSON per line, e.g.:
-
-```json
-{"flow_rate": 42.5, "pressure": 3.2, "temperature": 22.1, "idTroncon": "TR-Z1-042"}
-```
-
-Or:
-
-```json
-{"flow": 42.5, "pression": 3.2, "temp": 22.1}
-```
-
-The script normalizes field names automatically.
-
-### Deployment
-
-Build the project with:
+## Scripts utiles
 
 ```sh
+npm run dev        # Frontend local
+npm run start      # Backend Node + WebSocket
+npm run data:serial
+npm run test
+npm run lint
 npm run build
+npm run preview
 ```
 
-The production files are generated in dist/ and can be served by any static hosting provider.
+## Arborescence principale
+
+- `src/` : application React
+- `server.js` : backend Express + WebSocket
+- `app.py` : API FastAPI (modèle IA)
+- `scripts/serial-logger.js` : ingestion des données capteur
+- `supabase/functions/hydraulic-data-receiver` : fonction Edge Supabase

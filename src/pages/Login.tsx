@@ -17,7 +17,6 @@ const Login = () => {
   e.preventDefault();
   setLoading(true);
 
-  // ✅ login simple (sans supabase)
   if (email === "client@test.com" && password === "12345678") {
     localStorage.setItem("user", email); // ✅ IMPORTANT
     navigate("/"); // accès au dashboard

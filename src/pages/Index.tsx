@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-// import { createClient } from '@supabase/supabase-js';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { 
   Activity, Droplets, Gauge, Thermometer, AlertTriangle, CheckCircle, 
@@ -8,41 +7,57 @@ import {
 
 import { NetworkMap } from '@/components/NetworkMap';
 
-// const supabase = createClient(
-//   import.meta.env.VITE_SUPABASE_URL,
-//   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-// );
+interface SectionResult {
+  id: number;
+  flow: number;
+  pressure: number;
+  temperature: number;
+  leak_probability: number;
+  alert: boolean;
+}
+
+interface PredictResult {
+  sections: SectionResult[];
+  leak_probability: number;
+  leak_section: number | null;
+  alert_sections: number[];
+}
 
 interface SensorData {
   id: string;
   created_at: number;
-  flow_rate: number;
-  pressure: number;
+  flow1: number;
+  flow2: number;
+  flow3: number;
+  pressure1: number;
+  pressure2: number;
+  pressure3: number;
   temperature: number;
   is_leak_alert: boolean;
   leak_probability?: number;
+  sections?: SectionResult[];
+  alert_sections?: number[];
+  leak_section?: number | null;
 }
 
 const LOCAL_SVM_API_URL = "http://127.0.0.1:8000/predict";
 
-async function fetchLeakProbability(pressure: number, flow: number, temperature: number): Promise<number | undefined> {
+async function fetchPrediction(
+  flow1: number, flow2: number, flow3: number,
+  pressure1: number, pressure2: number, pressure3: number,
+  temp: number
+): Promise<PredictResult | undefined> {
   try {
     const response = await fetch(LOCAL_SVM_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pressure, flow, temp: temperature }),
+      body: JSON.stringify({ flow1, flow2, flow3, pressure1, pressure2, pressure3, temp }),
     });
-
     if (!response.ok) {
       console.error("Erreur SVM API", response.status);
       return undefined;
     }
-
-    const result = await response.json();
-    return typeof result.leak_probability === 'number' ? result.leak_probability
-      : typeof result.probability === 'number' ? result.probability
-      : typeof result.leakProbability === 'number' ? result.leakProbability
-      : undefined;
+    return await response.json() as PredictResult;
   } catch (err) {
     console.error("Erreur appel SVM:", err);
     return undefined;
@@ -80,6 +95,9 @@ export default function Index() {
   const [leakProbability, setLeakProbability] = useState<number | null>(null);
   const [alertActive, setAlertActive] = useState<boolean>(false);
   const [wsStatus, setWsStatus] = useState<string>('En attente de connexion');
+  const [sections, setSections] = useState<SectionResult[]>([]);
+  const [alertSections, setAlertSections] = useState<number[]>([]);
+  const [leakSection, setLeakSection] = useState<number | null>(null);
 
   const [clientConfig, setClientConfig] = useState({ nomClient: '', responsable: '', localisation: '', referenceProjet: '' });
   const [pipeConfig, setPipeConfig] = useState({
@@ -110,10 +128,15 @@ export default function Index() {
     }, 1500);
   };
 
-  const currentFlow = data[data.length - 1]?.flow_rate || 0;
-  const currentPressure = data[data.length - 1]?.pressure || 0;
-  const currentTemperature = data[data.length - 1]?.temperature || 0;
-  const lastMeasurementTime = data[data.length - 1]?.created_at ? formatTime(String(data[data.length - 1].created_at)) : 'N/A';
+  const last = data[data.length - 1];
+  const currentFlow1 = last?.flow1 || 0;
+  const currentFlow2 = last?.flow2 || 0;
+  const currentFlow3 = last?.flow3 || 0;
+  const currentPressure1 = last?.pressure1 || 0;
+  const currentPressure2 = last?.pressure2 || 0;
+  const currentPressure3 = last?.pressure3 || 0;
+  const currentTemperature = last?.temperature || 0;
+  const lastMeasurementTime = last?.created_at ? formatTime(String(last.created_at)) : 'N/A';
   const effectiveLeakProbability = leakProbability;
   const effectiveLeakProbabilityPercent = effectiveLeakProbability !== null ? Math.round(effectiveLeakProbability * 100) : null;
 
@@ -185,55 +208,60 @@ useEffect(() => {
     try {
       const json = JSON.parse(event.data);
 
-      const flow =
-        json?.data?.flow_rate ??
-        json.flow_rate ??
-        json.flow ??
-        0;
-      const pressure =
-        json?.data?.pressure ??
-        json.pressure ??
-        0;
-      const temperature =
-        json?.data?.temperature ??
-        json.temperature ??
-        json.temp ??
-        18.5;
+      const flow1 = json.flow1 ?? 0;
+      const flow2 = json.flow2 ?? 0;
+      const flow3 = json.flow3 ?? 0;
+      const pressure1 = json.pressure1 ?? 0;
+      const pressure2 = json.pressure2 ?? 0;
+      const pressure3 = json.pressure3 ?? 0;
+      const temperature = json.temperature ?? json.temp ?? 18.5;
 
       const now = new Date().getTime();
 
-      const leak_probability = await fetchLeakProbability(pressure, flow, temperature);
+      const prediction = await fetchPrediction(
+        flow1, flow2, flow3,
+        pressure1, pressure2, pressure3,
+        temperature
+      );
 
       const newPoint: SensorData = {
         id: Math.random().toString(),
         created_at: now,
-        flow_rate: flow,
-        pressure,
+        flow1, flow2, flow3,
+        pressure1, pressure2, pressure3,
         temperature,
-        is_leak_alert: leak_probability !== undefined && leak_probability >= 0.5,
-        ...(leak_probability !== undefined ? { leak_probability } : {}),
+        is_leak_alert: prediction !== undefined && prediction.alert_sections.length > 0,
+        ...(prediction ? {
+          leak_probability: prediction.leak_probability,
+          sections: prediction.sections,
+          alert_sections: prediction.alert_sections,
+          leak_section: prediction.leak_section,
+        } : {}),
       };
-      if (leak_probability !== undefined && leak_probability >= 0.7) {
 
-        console.log("🚨 Fuite détectée, envoi backend...");
-
+      if (prediction && prediction.alert_sections.length > 0) {
+        const sectionLabel = prediction.alert_sections.map(s => `Section ${s}`).join(', ');
+        console.log(`🚨 Fuite détectée — ${sectionLabel}`);
         fetch("http://localhost:4000/alert", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            message: "Fuite détectée sur le réseau",
-            probability: leak_probability,
-            time: new Date().toISOString()
+            message: `Fuite détectée — ${sectionLabel}`,
+            probability: prediction.leak_probability,
+            sections: prediction.alert_sections,
+            leak_section: prediction.leak_section,
+            time: new Date().toISOString(),
           }),
         });
       }
 
       setData((prev) => [...prev, newPoint].slice(-30));
-      if (leak_probability !== undefined) {
-        setLeakProbability(leak_probability);
-        setAlertActive(leak_probability >= 0.5);
+      if (prediction) {
+        setLeakProbability(prediction.leak_probability);
+        setAlertActive(prediction.alert_sections.length > 0);
+        setSections(prediction.sections);
+        setAlertSections(prediction.alert_sections);
+        setLeakSection(prediction.leak_section);
       }
 
     } catch (e) {
@@ -492,50 +520,105 @@ useEffect(() => {
               </div>
             </div>
 
+            {/* RELEVÉ TEMPS RÉEL — 6 CAPTEURS */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              {[
+                { label: 'Débit C1', value: currentFlow1, unit: 'L/min', color: 'cyan', dot: 'bg-cyan-400' },
+                { label: 'Débit C2', value: currentFlow2, unit: 'L/min', color: 'blue', dot: 'bg-blue-400' },
+                { label: 'Débit C3', value: currentFlow3, unit: 'L/min', color: 'indigo', dot: 'bg-indigo-400' },
+                { label: 'Pression C1', value: currentPressure1, unit: 'bar', color: 'amber', dot: 'bg-amber-400' },
+                { label: 'Pression C2', value: currentPressure2, unit: 'bar', color: 'orange', dot: 'bg-orange-400' },
+                { label: 'Pression C3', value: currentPressure3, unit: 'bar', color: 'yellow', dot: 'bg-yellow-300' },
+              ].map(({ label, value, unit, dot }) => (
+                <div key={label} className="bg-[#0F172A]/80 backdrop-blur-md border border-slate-800 p-4 rounded-2xl shadow-md flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${dot} shrink-0`}></span>
+                    <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold truncate">{label}</p>
+                  </div>
+                  <p className="text-xl font-black text-white font-mono">{value.toFixed(2)}</p>
+                  <p className="text-[10px] text-slate-500">{unit}</p>
+                </div>
+              ))}
+            </div>
+
             {/* GRAPHIQUES SÉPARÉS */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
               <div className="bg-[#0F172A]/80 backdrop-blur-md border border-slate-800 p-6 rounded-3xl shadow-xl">
-                <h3 className="text-cyan-400 font-bold mb-6 flex items-center gap-3 text-sm uppercase tracking-wider">
-                  <div className="p-1.5 bg-cyan-500/10 rounded-md"><Droplets className="w-4 h-4" /></div> Débit (L/min)
-                </h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-cyan-400 font-bold flex items-center gap-3 text-sm uppercase tracking-wider">
+                    <div className="p-1.5 bg-cyan-500/10 rounded-md"><Droplets className="w-4 h-4" /></div> Débit (L/min)
+                  </h3>
+                  <div className="flex items-center gap-3 text-xs text-slate-400">
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-cyan-400 inline-block"></span>C1</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-400 inline-block"></span>C2</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-indigo-400 inline-block"></span>C3</span>
+                  </div>
+                </div>
                 <div className="h-56">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={data} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                       <defs>
-                        <linearGradient id="colorFlow" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.4} />
+                        <linearGradient id="colorFlow1" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.35} />
                           <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="colorFlow2" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.25} />
+                          <stop offset="95%" stopColor="#60a5fa" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="colorFlow3" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#818cf8" stopOpacity={0.25} />
+                          <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                       <XAxis dataKey="created_at" tickFormatter={formatTime} stroke="#475569" fontSize={10} tickMargin={12} />
                       <YAxis stroke="#475569" fontSize={10} tickMargin={8} />
                       <Tooltip content={<CustomTooltip />} />
-                      <Area type="monotone" dataKey="flow_rate" name="Débit" unit="L/min" stroke="#22d3ee" strokeWidth={3} fill="url(#colorFlow)" dot={{ r: 0 }} activeDot={{ r: 6, fill: '#22d3ee', stroke: '#fff', strokeWidth: 2 }} />
+                      <Area type="monotone" dataKey="flow1" name="Débit C1" unit="L/min" stroke="#22d3ee" strokeWidth={2} fill="url(#colorFlow1)" dot={{ r: 0 }} activeDot={{ r: 5, fill: '#22d3ee', stroke: '#fff', strokeWidth: 2 }} />
+                      <Area type="monotone" dataKey="flow2" name="Débit C2" unit="L/min" stroke="#60a5fa" strokeWidth={2} fill="url(#colorFlow2)" dot={{ r: 0 }} activeDot={{ r: 5, fill: '#60a5fa', stroke: '#fff', strokeWidth: 2 }} />
+                      <Area type="monotone" dataKey="flow3" name="Débit C3" unit="L/min" stroke="#818cf8" strokeWidth={2} fill="url(#colorFlow3)" dot={{ r: 0 }} activeDot={{ r: 5, fill: '#818cf8', stroke: '#fff', strokeWidth: 2 }} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </div>
 
               <div className="bg-[#0F172A]/80 backdrop-blur-md border border-slate-800 p-6 rounded-3xl shadow-xl">
-                <h3 className="text-amber-400 font-bold mb-6 flex items-center gap-3 text-sm uppercase tracking-wider">
-                  <div className="p-1.5 bg-amber-500/10 rounded-md"><Gauge className="w-4 h-4" /></div> Pression (bar)
-                </h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-amber-400 font-bold flex items-center gap-3 text-sm uppercase tracking-wider">
+                    <div className="p-1.5 bg-amber-500/10 rounded-md"><Gauge className="w-4 h-4" /></div> Pression (bar)
+                  </h3>
+                  <div className="flex items-center gap-3 text-xs text-slate-400">
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>C1</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-400 inline-block"></span>C2</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-300 inline-block"></span>C3</span>
+                  </div>
+                </div>
                 <div className="h-56">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={data} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                       <defs>
-                        <linearGradient id="colorPressure" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.4} />
+                        <linearGradient id="colorPressure1" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.35} />
                           <stop offset="95%" stopColor="#fbbf24" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="colorPressure2" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#fb923c" stopOpacity={0.25} />
+                          <stop offset="95%" stopColor="#fb923c" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="colorPressure3" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#fde047" stopOpacity={0.25} />
+                          <stop offset="95%" stopColor="#fde047" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                      <XAxis dataKey="created_at" tickFormatter={(t) => new Date(t).toLocaleTimeString()} stroke="#475569" fontSize={10} tickMargin={12} />
+                      <XAxis dataKey="created_at" tickFormatter={formatTime} stroke="#475569" fontSize={10} tickMargin={12} />
                       <YAxis stroke="#475569" fontSize={10} tickMargin={8} />
                       <Tooltip content={<CustomTooltip />} />
-                      <Area type="monotone" dataKey="pressure" name="Pression" unit="bar" stroke="#fbbf24" strokeWidth={3} fill="url(#colorPressure)" dot={{ r: 0 }} activeDot={{ r: 6, fill: '#fbbf24', stroke: '#fff', strokeWidth: 2 }} />
+                      <Area type="monotone" dataKey="pressure1" name="Pression C1" unit="bar" stroke="#fbbf24" strokeWidth={2} fill="url(#colorPressure1)" dot={{ r: 0 }} activeDot={{ r: 5, fill: '#fbbf24', stroke: '#fff', strokeWidth: 2 }} />
+                      <Area type="monotone" dataKey="pressure2" name="Pression C2" unit="bar" stroke="#fb923c" strokeWidth={2} fill="url(#colorPressure2)" dot={{ r: 0 }} activeDot={{ r: 5, fill: '#fb923c', stroke: '#fff', strokeWidth: 2 }} />
+                      <Area type="monotone" dataKey="pressure3" name="Pression C3" unit="bar" stroke="#fde047" strokeWidth={2} fill="url(#colorPressure3)" dot={{ r: 0 }} activeDot={{ r: 5, fill: '#fde047', stroke: '#fff', strokeWidth: 2 }} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>

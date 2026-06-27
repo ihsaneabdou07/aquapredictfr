@@ -1,4 +1,0 @@
-project_id = "hresdrzdhdoojmddehxe"
-
-[functions.hydraulic-data-receiver]
-verify_jwt = false

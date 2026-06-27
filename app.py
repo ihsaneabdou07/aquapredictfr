@@ -14,25 +14,37 @@ app.add_middleware(
 
 @app.post("/predict")
 async def predict(request: Request):
-    # Récupération du JSON envoyé par Supabase
     data = await request.json()
-    
-    # Extraction des paramètres
-    pressure = float(data.get("pressure"))
-    flow = float(data.get("flow"))
-    temp = float(data.get("temp", 18.5)) # Valeur par défaut 18.5 si non fourni
-    
-    # Appel à votre modèle
+
+    # Supporte le format multi-capteurs (flow1/2/3, pressure1/2/3)
+    # ou le format simple (flow, pressure) — rétrocompatibilité.
+    flow1 = float(data.get("flow1", data.get("flow", 0)))
+    flow2 = float(data.get("flow2", flow1))
+    flow3 = float(data.get("flow3", flow1))
+    pressure1 = float(data.get("pressure1", data.get("pressure", 0)))
+    pressure2 = float(data.get("pressure2", pressure1))
+    pressure3 = float(data.get("pressure3", pressure1))
+    temp = float(data.get("temp", 18.5))
+
+    # Moyennes pour le modèle ML
+    flow = (flow1 + flow2 + flow3) / 3
+    pressure = (pressure1 + pressure2 + pressure3) / 3
+
     probability = get_leak_probability(pressure, flow, temp)
 
-    # Enregistrer la mesure et les statistiques pour reporting
     try:
         record_measurement(pressure=pressure, flow=flow, temperature=temp, probability=probability)
     except Exception:
-        # ne pas faire échouer la route si l'enregistrement échoue
         pass
 
-    return {"leak_probability": probability}
+    return {
+        "leak_probability": probability,
+        "sensors": {
+            "flow": {"c1": flow1, "c2": flow2, "c3": flow3, "avg": round(flow, 3)},
+            "pressure": {"c1": pressure1, "c2": pressure2, "c3": pressure3, "avg": round(pressure, 3)},
+            "temperature": temp,
+        }
+    }
 
 from fastapi import UploadFile, File
 from models.network_vision import detect_network_components

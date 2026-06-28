@@ -1,5 +1,5 @@
 import React from 'react';
-import networkImage from '../../image.png';
+import networkImage from '../../schema-reseau.jpeg';
 
 interface Sensor {
   id: string;

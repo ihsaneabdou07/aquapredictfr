@@ -13,9 +13,9 @@ const int flowPin2 = 5;
 const int flowPin3 = 27;
 
 
-float offset1 = 1 - 0.62;
-float offset2 = 1- 0.62;
-float offset3 = 1- 0.00;
+float offset1 = 1 - 12;
+float offset2 = 1- 12;
+float offset3 = 1- 6.42;
 
 
 // calibration (adapter selon capteur)

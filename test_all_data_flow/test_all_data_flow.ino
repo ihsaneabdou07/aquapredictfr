@@ -15,7 +15,7 @@ const int flowPin3 = 27;
 
 float offset1 = 1 - 12;
 float offset2 = 1- 12;
-float offset3 = 1- 6.42;
+float offset3 = 1- 3;
 
 
 // calibration (adapter selon capteur)
@@ -92,7 +92,7 @@ float pressure3 = ((raw3 / 4095.0) * maxPressurePa / 100000.0) + offset3;
 
     // ===== TEMPERATURE SIMULÉE =====
     float t = millis() / 1000.0;
-    float temperature = 22 + sin(t * 0.1) * 0.1;
+    float temperature = 22 + sin(t * 0.1);
 
     // ===== JSON =====
     Serial.print("{");

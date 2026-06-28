@@ -43,21 +43,37 @@ interface SensorData {
 const LOCAL_SVM_API_URL = "http://127.0.0.1:8000/predict";
 
 async function fetchPrediction(
-  flow1: number, flow2: number, flow3: number,
-  pressure1: number, pressure2: number, pressure3: number,
-  temp: number
+  flow1: number,
+  flow2: number,
+  flow3: number,
+  pressure1: number,
+  pressure2: number,
+  pressure3: number,
+  temperature: number
 ): Promise<PredictResult | undefined> {
   try {
     const response = await fetch(LOCAL_SVM_API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ flow1, flow2, flow3, pressure1, pressure2, pressure3, temp }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        flow1,
+        flow2,
+        flow3,
+        pressure1,
+        pressure2,
+        pressure3,
+        temperature,
+      }),
     });
+
     if (!response.ok) {
       console.error("Erreur SVM API", response.status);
       return undefined;
     }
-    return await response.json() as PredictResult;
+
+    return (await response.json()) as PredictResult;
   } catch (err) {
     console.error("Erreur appel SVM:", err);
     return undefined;
@@ -93,8 +109,8 @@ export default function Index() {
   const [isScanning, setIsScanning] = useState(false);
   const [data, setData] = useState<SensorData[]>([]);
   const [leakProbability, setLeakProbability] = useState<number | null>(null);
-  const [alertActive, setAlertActive] = useState<boolean>(false);
-  const [wsStatus, setWsStatus] = useState<string>('En attente de connexion');
+  const [alertActive, setAlertActive] = useState(false);
+  const [wsStatus, setWsStatus] = useState("En attente de connexion");
   const [sections, setSections] = useState<SectionResult[]>([]);
   const [alertSections, setAlertSections] = useState<number[]>([]);
   const [leakSection, setLeakSection] = useState<number | null>(null);
@@ -239,17 +255,23 @@ useEffect(() => {
         } : {}),
       };
 
-      if (prediction && prediction.alert_sections.length > 0) {
-        const sectionLabel = prediction.alert_sections.map(s => `Section ${s}`).join(', ');
+     if (prediction && prediction.alert_sections.length > 0) {
+        const sectionLabel = prediction.alert_sections
+          .map((s) => `Section ${s}`)
+          .join(", ");
+
         console.log(`🚨 Fuite détectée — ${sectionLabel}`);
-        fetch("http://localhost:4000/alert", {
+
+        await fetch("http://localhost:4000/alert", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             message: `Fuite détectée — ${sectionLabel}`,
+            section: prediction.leak_section,
             probability: prediction.leak_probability,
             sections: prediction.alert_sections,
-            leak_section: prediction.leak_section,
             time: new Date().toISOString(),
           }),
         });
@@ -285,12 +307,38 @@ useEffect(() => {
 useEffect(() => {
   const alertSocket = new WebSocket("ws://localhost:4001");
 
+  alertSocket.onopen = () => {
+    console.log("✅ WebSocket alertes connecté");
+  };
+
   alertSocket.onmessage = (event) => {
-    const alert = JSON.parse(event.data);
+    const alertData = JSON.parse(event.data);
 
-    alert("🚨 ALERTE CLIENT:\n" + alert.message);
+    console.log("🚨 ALERTE REÇUE:", alertData);
 
-    console.log("ALERTE REÇUE:", alert);
+    if (alertData.section !== undefined) {
+      setAlertSections((prev) => {
+        if (prev.includes(alertData.section)) {
+          return prev;
+        }
+        return [...prev, alertData.section];
+      });
+
+      setLeakSection(alertData.section);
+      setAlertActive(true);
+    }
+
+    if (alertData.probability !== undefined) {
+      setLeakProbability(alertData.probability);
+    }
+
+    window.alert(
+      `🚨 Fuite détectée\nSection : ${alertData.section}\nProbabilité : ${(alertData.probability * 100).toFixed(1)}%`
+    );
+  };
+
+  alertSocket.onerror = (err) => {
+    console.error("❌ Erreur WebSocket alertes:", err);
   };
 
   return () => alertSocket.close();
@@ -336,23 +384,40 @@ useEffect(() => {
             </div>
             <div className="flex items-center gap-3">
               {alertActive ? (
-                <div className="bg-rose-500/10 border border-rose-500/50 text-rose-400 px-5 py-2.5 rounded-xl font-bold animate-pulse flex flex-col gap-2">
-                  <div className="flex items-center gap-3">
-                    <AlertTriangle className="w-5 h-5" />
+                <div className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300">
+                  <div className="font-bold flex items-center gap-2">
+                    <AlertTriangle size={18} />
                     FUITE SUSPECTÉE
                   </div>
-                  <div className="text-sm text-slate-200">
-                    Probabilité : {leakProbability !== null ? `${(leakProbability*100).toFixed(1)}%` : 'En attente'}
+
+                  <div className="text-sm">
+                    Probabilité :{" "}
+                    {leakProbability !== null
+                      ? `${(leakProbability * 100).toFixed(1)}%`
+                      : "En attente"}
+                  </div>
+
+                  <div className="text-sm">
+                    Section :{" "}
+                    {leakSection !== null
+                      ? `Section ${leakSection}`
+                      : alertSections.length > 0
+                        ? alertSections.map((s) => `Section ${s}`).join(", ")
+                        : "Non localisée"}
                   </div>
                 </div>
               ) : (
-                <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-5 py-2.5 rounded-xl font-medium flex flex-col gap-2">
-                  <div className="flex items-center gap-3">
-                    <ShieldCheck className="w-5 h-5" />
-                    Réseau Nominal
+                <div className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">
+                  <div className="font-bold flex items-center gap-2">
+                    <CheckCircle size={18} />
+                    Réseau nominal
                   </div>
-                  <div className="text-sm text-slate-200">
-                    Probabilité : {leakProbability !== null ? `${(leakProbability*100).toFixed(1)}%` : 'En attente'}
+
+                  <div className="text-sm">
+                    Probabilité :{" "}
+                    {leakProbability !== null
+                      ? `${(leakProbability * 100).toFixed(1)}%`
+                      : "En attente"}
                   </div>
                 </div>
               )}
@@ -518,6 +583,82 @@ useEffect(() => {
                 </div>
                 <p className="text-xs text-slate-500 mt-4 font-medium px-2 py-1.5 bg-slate-900/50 rounded-lg inline-flex w-fit border border-slate-800/80">Tronçon actif : <span className="text-white ml-1">{pipeConfig.idTroncon}</span></p>
               </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              {sections.length === 0 ? (
+                <div className="col-span-3 p-5 rounded-2xl bg-slate-900/70 border border-slate-700 text-slate-400">
+                  En attente des probabilités par section...
+                </div>
+              ) : (
+                sections.map((section) => {
+                  const probabilityPercent = Math.round(section.leak_probability * 100);
+                  const isCritical = section.alert || section.id === leakSection;
+
+                  return (
+                    <div
+                      key={section.id}
+                      className={`p-5 rounded-2xl border transition-all ${
+                        isCritical
+                          ? "bg-red-500/10 border-red-500/40 shadow-lg shadow-red-500/10"
+                          : "bg-slate-900/70 border-slate-700"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-bold text-white">
+                          Section {section.id}
+                        </h3>
+
+                        {isCritical ? (
+                          <AlertTriangle className="text-red-400" size={22} />
+                        ) : (
+                          <CheckCircle className="text-emerald-400" size={22} />
+                        )}
+                      </div>
+
+                      <div className="text-sm text-slate-400 mb-2">
+                        Pression : {section.pressure.toFixed(2)} bar
+                      </div>
+
+                      <div className="text-sm text-slate-400 mb-2">
+                        Débit : {section.flow.toFixed(2)} L/min
+                      </div>
+
+                      <div className="text-sm text-slate-400 mb-4">
+                        Température : {section.temperature.toFixed(1)} °C
+                      </div>
+
+                      <div className="text-3xl font-bold mb-2">
+                        {probabilityPercent}%
+                      </div>
+
+                      <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${
+                            probabilityPercent >= 70
+                              ? "bg-red-500"
+                              : probabilityPercent >= 40
+                                ? "bg-orange-400"
+                                : "bg-emerald-400"
+                          }`}
+                          style={{ width: `${probabilityPercent}%` }}
+                        />
+                      </div>
+
+                      <div className="mt-3 text-sm">
+                        {isCritical ? (
+                          <span className="text-red-300 font-semibold">
+                            ⚠️ Fuite probable dans cette section
+                          </span>
+                        ) : (
+                          <span className="text-emerald-300">
+                            Section stable
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
 
             {/* RELEVÉ TEMPS RÉEL — 6 CAPTEURS */}

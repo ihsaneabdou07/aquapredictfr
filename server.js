@@ -66,23 +66,29 @@ app.post("/alert", (req, res) => {
   fs.writeFileSync(ALERTS_FILE, JSON.stringify(alerts));
 
   // ✅ EMAIL AUTOMATIQUE
-  transporter.sendMail({
-    from: "AquaPredict",
-    to: "mamadiallo944@gmail.com",
-    subject: "🚨 Fuite détectée",
-    html: `
-      <div style="text-align:center;">
-        <h2 style="color:red;">⚠️ Fuite détectée</h2>
-        <p>Une anomalie a été détectée sur votre réseau.</p>
-
-        <a href="http://172.22.6.41:8080/login"
-           style="background:#2563eb;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;">
-          Accéder à la plateforme
-        </a>
-      </div>
-    `
+  const { section, probability } = req.body;
+  
+// ✅ envoi en temps réel à tous les clients connectés
+  wss.clients.forEach(client => {
+    client.send(JSON.stringify({
+      section,
+      probability
+    }));
   });
 
+
+transporter.sendMail({
+  from: "AquaPredict",
+  to: "mamadiallo944@gmail.com",
+  subject: "🚨 Fuite détectée",
+  html: `
+    <h2>⚠️ Fuite détectée</h2>
+    <p><b>Section :</b> ${section}</p>
+    <p><b>Probabilité :</b> ${(probability * 100).toFixed(2)}%</p>
+    <p>Action recommandée immédiate.</p>
+    <a href="http://172.22.6.41:8080/login">Accéder à la plateforme</a>
+  `
+});
   res.json({ success: true });
 });
 

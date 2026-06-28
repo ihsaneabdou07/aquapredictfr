@@ -1,8 +1,7 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from models.inference import get_leak_probability
 from models.recorder import record_measurement, compute_horizon_label, compute_network_status
-
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -11,46 +10,75 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 @app.post("/predict")
 async def predict(request: Request):
     data = await request.json()
 
-    # Supporte le format multi-capteurs (flow1/2/3, pressure1/2/3)
-    # ou le format simple (flow, pressure) — rétrocompatibilité.
-    flow1 = float(data.get("flow1", data.get("flow", 0)))
-    flow2 = float(data.get("flow2", flow1))
-    flow3 = float(data.get("flow3", flow1))
-    pressure1 = float(data.get("pressure1", data.get("pressure", 0)))
-    pressure2 = float(data.get("pressure2", pressure1))
-    pressure3 = float(data.get("pressure3", pressure1))
-    temp = float(data.get("temp", 18.5))
+    temperature = data.get("temperature", data.get("temp", 0))
 
-    # Moyennes pour le modèle ML
-    flow = (flow1 + flow2 + flow3) / 3
-    pressure = (pressure1 + pressure2 + pressure3) / 3
+    raw_sections = [
+        {
+            "id": 1,
+            "flow": data.get("flow1", 0),
+            "pressure": data.get("pressure1", 0),
+            "temperature": temperature,
+        },
+        {
+            "id": 2,
+            "flow": data.get("flow2", 0),
+            "pressure": data.get("pressure2", 0),
+            "temperature": temperature,
+        },
+        {
+            "id": 3,
+            "flow": data.get("flow3", 0),
+            "pressure": data.get("pressure3", 0),
+            "temperature": temperature,
+        },
+    ]
 
-    probability = get_leak_probability(pressure, flow, temp)
+    results = []
+    max_probability = 0
+    leak_section = None
+    alert_sections = []
 
-    try:
-        record_measurement(pressure=pressure, flow=flow, temperature=temp, probability=probability)
-    except Exception:
-        pass
+    for section in raw_sections:
+        probability = get_leak_probability(
+            section["pressure"],
+            section["flow"],
+            section["temperature"]
+        )
+
+        is_alert = probability >= 0.7
+
+        if is_alert:
+            alert_sections.append(section["id"])
+
+        if probability > max_probability:
+            max_probability = probability
+            leak_section = section["id"]
+
+        results.append({
+            "id": section["id"],
+            "flow": section["flow"],
+            "pressure": section["pressure"],
+            "temperature": section["temperature"],
+            "leak_probability": probability,
+            "alert": is_alert,
+        })
 
     return {
-        "leak_probability": probability,
-        "sensors": {
-            "flow": {"c1": flow1, "c2": flow2, "c3": flow3, "avg": round(flow, 3)},
-            "pressure": {"c1": pressure1, "c2": pressure2, "c3": pressure3, "avg": round(pressure, 3)},
-            "temperature": temp,
-        }
+        "sections": results,
+        "leak_probability": max_probability,
+        "leak_section": leak_section if max_probability >= 0.7 else None,
+        "alert_sections": alert_sections,
     }
 
-from fastapi import UploadFile, File
-from models.network_vision import detect_network_components
 
 @app.post("/analyze-network")
 async def analyze_network(file: UploadFile = File(...)):
+    from models.network_vision import detect_network_components
+    
     # Sauvegarde temporaire de l'image reçue
     temp_path = f"temp_{file.filename}"
     with open(temp_path, "wb") as buffer:

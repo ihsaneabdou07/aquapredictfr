@@ -13,9 +13,9 @@ const int flowPin2 = 5;
 const int flowPin3 = 27;
 
 
-float offset1 = 1 - 12;
-float offset2 = 1- 12;
-float offset3 = 1- 3;
+float offset1 = 1 - 9.6;
+float offset2 = 1 - 9.6;
+float offset3 = 1 - 0.5;
 
 
 // calibration (adapter selon capteur)
@@ -33,9 +33,15 @@ const float maxPressurePa = 1200000.0;
 unsigned long lastTime = 0;
 
 // ===== INTERRUPTS =====
-void IRAM_ATTR count1() { pulse1++; }
-void IRAM_ATTR count2() { pulse2++; }
-void IRAM_ATTR count3() { pulse3++; }
+void IRAM_ATTR count1() {
+  pulse1++;
+}
+void IRAM_ATTR count2() {
+  pulse2++;
+}
+void IRAM_ATTR count3() {
+  pulse3++;
+}
 
 void setup() {
   Serial.begin(115200);
@@ -85,10 +91,10 @@ void loop() {
     int raw2 = analogRead(pressurePin2);
     int raw3 = analogRead(pressurePin3);
 
-    
-float pressure1 = ((raw1 / 4095.0) * maxPressurePa / 100000.0) + offset1; // en bar
-float pressure2 = ((raw2 / 4095.0) * maxPressurePa / 100000.0) + offset2;
-float pressure3 = ((raw3 / 4095.0) * maxPressurePa / 100000.0) + offset3;
+
+    float pressure1 = ((raw1 / 4095.0) * maxPressurePa / 100000.0) + offset1;  // en bar
+    float pressure2 = ((raw2 / 4095.0) * maxPressurePa / 100000.0) + offset2;
+    float pressure3 = ((raw3 / 4095.0) * maxPressurePa / 100000.0) + offset3;
 
     // ===== TEMPERATURE SIMULÉE =====
     float t = millis() / 1000.0;
@@ -97,15 +103,28 @@ float pressure3 = ((raw3 / 4095.0) * maxPressurePa / 100000.0) + offset3;
     // ===== JSON =====
     Serial.print("{");
 
-    Serial.print("\"flow1\":"); Serial.print(flow1); Serial.print(",");
-    Serial.print("\"flow2\":"); Serial.print(flow2); Serial.print(",");
-    Serial.print("\"flow3\":"); Serial.print(flow3); Serial.print(",");
+    Serial.print("\"flow1\":");
+    Serial.print(flow1);
+    Serial.print(",");
+    Serial.print("\"flow2\":");
+    Serial.print(flow2);
+    Serial.print(",");
+    Serial.print("\"flow3\":");
+    Serial.print(flow3);
+    Serial.print(",");
 
-    Serial.print("\"pressure1\":"); Serial.print(pressure1); Serial.print(",");
-    Serial.print("\"pressure2\":"); Serial.print(pressure2); Serial.print(",");
-    Serial.print("\"pressure3\":"); Serial.print(pressure3); Serial.print(",");
+    Serial.print("\"pressure1\":");
+    Serial.print(pressure1);
+    Serial.print(",");
+    Serial.print("\"pressure2\":");
+    Serial.print(pressure2);
+    Serial.print(",");
+    Serial.print("\"pressure3\":");
+    Serial.print(pressure3);
+    Serial.print(",");
 
-    Serial.print("\"temperature\":"); Serial.print(temperature);
+    Serial.print("\"temperature\":");
+    Serial.print(temperature);
 
     Serial.println("}");
 

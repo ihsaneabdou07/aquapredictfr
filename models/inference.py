@@ -76,18 +76,25 @@ def get_leak_probability(pressure, flow, temp):
     # une probabilité aléatoire entre 50% et 90% afin d'obtenir des exemples
     # de comportements sur l'interface.
     # Code réel d'inférence (décommenter pour usage réel) :
-    # try:
-    #     if scaler is not None:
-    #         data_scaled = scaler.transform(data)
-    #     else:
-    #         data_scaled = data
-    #     if model is None:
-    #         raise RuntimeError('Modèle non disponible')
-    #     prob = model.predict_proba(data_scaled)[:, 1][0]
-    #     return float(prob)
-    # except Exception as e:
-    #     logger.warning("Prédiction SVM échouée: %s", e)
-    #     # en cas d'échec sur le modèle, on pourrait retomber sur un fallback
-    #     # mais ici on reste dans le mode démo.
-
-    return float(random.uniform(0.05, 0.1))
+    try:
+         if scaler is not None:
+             data_scaled = scaler.transform(data)
+         else:
+             data_scaled = data
+         if model is None:
+             raise RuntimeError('Modèle non disponible')
+         prob = model.predict_proba(data_scaled)[:, 1][0]
+         print("Features =", data_scaled)
+         print("Predict =", model.predict(data_scaled))
+         print("Predict_proba =", model.predict_proba(data_scaled))
+         return float(prob)
+    except Exception as e:
+         logger.warning("Prédiction SVM échouée: %s", e)
+         # en cas d'échec sur le modèle, on pourrait retomber sur un fallback
+         # mais ici on reste dans le mode démo.
+    # --- Mode SIMULATION ---
+    # Pour le mode simulation, on retourne une probabilité aléatoire entre
+    # SIMULATION_MIN_   PROB et SIMULATION_MAX_PROB, mais seulement pendant
+    # les 15 premières secondes après le démarrage du serveur.
+    if time.time() - SIMULATION_START_TS < SIMULATION_DURATION_SECONDS:
+        return random.uniform(SIMULATION_MIN_PROB, SIMULATION_MAX_PROB)     

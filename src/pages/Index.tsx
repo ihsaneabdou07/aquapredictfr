@@ -332,9 +332,6 @@ useEffect(() => {
       setLeakProbability(alertData.probability);
     }
 
-    window.alert(
-      `🚨 Fuite détectée\nSection : ${alertData.section}\nProbabilité : ${(alertData.probability * 100).toFixed(1)}%`
-    );
   };
 
   alertSocket.onerror = (err) => {

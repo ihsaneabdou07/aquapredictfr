@@ -2,6 +2,7 @@ import express from "express";
 import fs from "fs";
 import { WebSocketServer } from "ws";
 import nodemailer from "nodemailer";
+import cors from "cors";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -10,6 +11,8 @@ const transporter = nodemailer.createTransport({
     pass: "kxex elfy xsvz sxvm"
   }
 });
+let lastAlertTime = 0;
+const ALERT_COOLDOWN = 10 * 60 * 1000; // 10 minutes
 
 
 const wss = new WebSocketServer({ port: 4001 });
@@ -19,6 +22,7 @@ wss.on("connection", (ws) => {
 });
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 const PORT = 4000;
@@ -75,20 +79,26 @@ app.post("/alert", (req, res) => {
       probability
     }));
   });
+  const currentTime = Date.now();
+  if (currentTime - lastAlertTime > ALERT_COOLDOWN) {
+ 
 
 
-transporter.sendMail({
-  from: "AquaPredict",
-  to: "mamadiallo944@gmail.com",
-  subject: "🚨 Fuite détectée",
-  html: `
-    <h2>⚠️ Fuite détectée</h2>
-    <p><b>Section :</b> ${section}</p>
-    <p><b>Probabilité :</b> ${(probability * 100).toFixed(2)}%</p>
-    <p>Action recommandée immédiate.</p>
-    <a href="http://172.22.6.41:8080/login">Accéder à la plateforme</a>
-  `
-});
+    transporter.sendMail({
+      from: "AquaPredict",
+      to: "mamadiallo944@gmail.com",
+      subject: "🚨 Fuite détectée",
+      html: `
+        <h2>⚠️ Fuite détectée</h2>
+        <p><b>Section :</b> ${section}</p>
+        <p><b>Probabilité :</b> ${(probability * 100).toFixed(2)}%</p>
+        <p>Action recommandée immédiate.</p>
+        <a href="http://172.22.6.41:8080/login">Accéder à la plateforme</a>
+      `
+    });
+    lastAlertTime = currentTime;
+  }
+
   res.json({ success: true });
 });
 

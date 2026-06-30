@@ -40,7 +40,7 @@ parser.on("data", (data) => {
     const json = JSON.parse(data);
 
     // ===== EXTRACTION SAFE =====
-   /* const flow1 = json.flow1 ?? 0;
+    const flow1 = json.flow1 ?? 0;
     const flow2 = json.flow2 ?? 0;
     const flow3 = json.flow3 ?? 0;
 
@@ -49,18 +49,20 @@ parser.on("data", (data) => {
     const pressure3 = json.pressure3 ?? 0;
 
     const temperature = json.temperature ?? 0;
-    */
+   
     // Simmulation de données si nécessaire
+    /*
+
     
     const flow1 = +(5.8 + Math.random() * 0.2).toFixed(2);
-    const flow2 = +(flow1 - (0.2 + Math.random() * 0.3)).toFixed(2);
+    const flow2 = +(flow1 - (1 + Math.random() * 0.3)).toFixed(2);
     const flow3 = +(flow2 - (1.3 + Math.random() * 0.5)).toFixed(2);
 
     const pressure1 = +(4.3 + Math.random() * 0.3).toFixed(2);
-    const pressure2 = +(pressure1 - (0.2 + Math.random() * 0.2)).toFixed(2);
+    const pressure2 = +(pressure1 - (1 + Math.random() * 0.2)).toFixed(2);
     const pressure3 = +(pressure2 - (1.2 + Math.random() * 0.6)).toFixed(2);
     const temperature = json.temperature ?? 0;
-
+     */
     // ===== DEBUG TERMINAL =====
     console.log(
       `💧 [F1:${flow1.toFixed(2)} | F2:${flow2.toFixed(2)} | F3:${flow3.toFixed(2)}] L/min`
